@@ -1,20 +1,27 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import Providers from './src/components/global/index.js';
+import { useWindowDimensions, Platform } from "react-native";
+import { useFonts } from 'expo-font';
+
+import Globals from './src/GlobalValues';
+import GlobalFunctions from './src/GlobalFunctions';
+
 
 export default function App() {
+  Globals.globalDimensions = useWindowDimensions();
+  Globals.isLoading = true;
+  GlobalFunctions._getLocationAsync(true);
+  Globals.platform = Platform.OS;
+  
+  console.log('globals set' + Globals.globalDimensions.height + " " + Globals.globalDimensions.width);
+  useFonts({
+    'Gilroy': require('./src/assets/fonts/Gilroy-Regular.otf'),
+    'Gilroy-Bold': require('./src/assets/fonts/Gilroy-Bold.otf'),
+    'Gilroy-SemiBold': require('./src/assets/fonts/Gilroy-SemiBold.otf'),
+  });
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+    <Providers />
+  )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+// Path: GlobalValues.js
