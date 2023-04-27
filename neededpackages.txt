@@ -1,0 +1,14 @@
+For Card swiping:
+https://github.com/swaplet/react-native-swipe-cards-deck
+better swiping:
+https://github.com/meliorence/react-native-snap-carousel
+
+For Skeleton loads:
+https://github.com/danilowoz/react-content-loader
+
+Another carousel package:
+https://github.com/dohooo/react-native-reanimated-carousel
+
+Icon libs:
+https://github.com/expo/vector-icons
+https://github.com/Iconscout/react-native-unicons

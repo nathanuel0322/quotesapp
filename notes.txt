@@ -1,0 +1,4 @@
+We can nest another carousel in the card carousel on main page, the main carousel would encapsulate the top tabs and the cards.
+
+Use Bottom Navigation.
+https://reactnavigation.org/docs/bottom-tab-navigator/

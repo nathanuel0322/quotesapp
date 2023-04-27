@@ -8,9 +8,10 @@ import Globals from '../../GlobalValues';
 const Providers = () => {
   Globals.globalDimensions = useWindowDimensions();
   return (
-    <AuthProvider>
+    // remove hidden code when ready to use authentication
+    // <AuthProvider>
       <Routes />
-    </AuthProvider>
+    // </AuthProvider>
   );
 }
 
