@@ -45,7 +45,7 @@ export default function Tabs() {
           headerShown: false,
           tabBarIcon: ({focused}) => (
             <View style={{top: Globals.globalDimensions.height > 900 && Globals.globalDimensions.height * 0.0145788337,}}>
-              <MaterialCommunityIcons name="brush-variant" size={24} color={focused ? "black" : "white"} />
+              <MaterialCommunityIcons name="brush-variant" size={24} color={focused ? "red" : "white"} />
             </View>
           ),
         }}
@@ -57,7 +57,7 @@ export default function Tabs() {
           headerShown: false,
           tabBarIcon: ({focused}) => (
             <View style={{top: Globals.globalDimensions.height > 900 && Globals.globalDimensions.height * 0.0145788337,}}>
-              <MaterialCommunityIcons name="window-closed-variant" size={24} color={focused ? "black" : "white"} />
+              <MaterialCommunityIcons name="window-closed-variant" size={24} color={focused ? "red" : "white"} />
             </View>
           ),
         }}
@@ -69,7 +69,7 @@ export default function Tabs() {
           headerShown: false,
           tabBarIcon: ({focused}) => (
             <View style={{top: Globals.globalDimensions.height > 900 && Globals.globalDimensions.height * 0.0145788337,}}>
-              <MaterialCommunityIcons name="dots-horizontal" size={24} color={focused ? "black" : "white"} />
+              <MaterialCommunityIcons name="dots-horizontal" size={24} color={focused ? "red" : "white"} />
             </View>
           ),
         }}
