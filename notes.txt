@@ -2,3 +2,10 @@ We can nest another carousel in the card carousel on main page, the main carouse
 
 Use Bottom Navigation.
 https://reactnavigation.org/docs/bottom-tab-navigator/
+
+Spotify capabilities:
+https://stackoverflow.com/a/70738764
+https://docs.expo.dev/guides/authentication/#spotify
+
+Google Docs:
+https://docs.google.com/document/d/1Skxu1sz3kEQHLaW0wd0z5dUHdIJ4I-Vf4H97N91-5ik/edit
