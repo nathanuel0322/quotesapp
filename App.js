@@ -7,7 +7,7 @@ import Globals from './src/GlobalValues';
 import GlobalFunctions from './src/GlobalFunctions';
 
 
-export default function App() {
+export default function App() { //test
   Globals.globalDimensions = useWindowDimensions();
   Globals.isLoading = true;
   GlobalFunctions._getLocationAsync(true);
