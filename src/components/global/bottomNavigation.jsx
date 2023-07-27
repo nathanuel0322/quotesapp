@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import Brush from '../../screens/Brush';
 import Search from '../../screens/Search';
-import CalendarScreen from '../../screens/Calendar';
+import CategoriesScreen from '../../screens/CategoriesScreen';
 import GlobalStyles from '../../GlobalStyles';
 import Globals from '../../GlobalValues';
 
@@ -63,8 +63,8 @@ export default function Tabs() {
         }}
       />
       <Tab.Screen
-        name="Other"
-        component={CalendarScreen}
+        name="Categories"
+        component={CategoriesScreen}
         options={{
           headerShown: false,
           tabBarIcon: ({focused}) => (

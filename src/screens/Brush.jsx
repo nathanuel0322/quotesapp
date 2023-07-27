@@ -58,9 +58,6 @@ export default function Brush({navigation}) {
                         >
                             {item[0]}   
                         </View>
-                        <View onPress={() => [console.log("Editing " + key), bottomSheetRef.current.expand(), setWhichPressed(key)]} style={{marginLeft: 'auto'}}>
-                            <EditCardIcon />
-                        </View>
                     </TouchableOpacity>
                 ))}
             </ScrollView>
