@@ -6,6 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Brush from '../../screens/Brush';
 import Search from '../../screens/Search';
 import CategoriesScreen from '../../screens/CategoriesScreen';
+import Create from '../../screens/Create';
 import GlobalStyles from '../../GlobalStyles';
 import Globals from '../../GlobalValues';
 
@@ -70,6 +71,18 @@ export default function Tabs() {
           tabBarIcon: ({focused}) => (
             <View style={{top: Globals.globalDimensions.height > 900 && Globals.globalDimensions.height * 0.0145788337,}}>
               <MaterialCommunityIcons name="dots-horizontal" size={24} color={focused ? "red" : "white"} />
+            </View>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Create"
+        component={Create}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({focused}) => (
+            <View style={{top: Globals.globalDimensions.height > 900 && Globals.globalDimensions.height * 0.0145788337,}}>
+              <MaterialCommunityIcons name="plus" size={24} color={focused ? "red" : "white"} />
             </View>
           ),
         }}
