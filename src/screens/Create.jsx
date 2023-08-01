@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Button, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Button, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 const emotions = ['Happy', 'Sad', 'Angry', 'Surprised', 'Neutral'];
@@ -26,17 +26,19 @@ const ImagePickerScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}>
       {selectedImage ? (
         <Image source={{ uri: selectedImage }} style={styles.image} />
       ) : (
         <TouchableOpacity onPress={pickImage}>
-          <Text>Select a Photo</Text>
+          <Text style={styles.textstyles}>Select a Photo</Text>
         </TouchableOpacity>
       )}
 
       <View style={styles.emotionContainer}>
-        <Text style={styles.emotionLabel}>Select Emotion:</Text>
+        <Text style={[styles.emotionLabel, styles.textstyles]}>
+          Select Emotion:
+        </Text>
         {emotions.map((emotion) => (
           <TouchableOpacity
             key={emotion}
@@ -62,15 +64,14 @@ const ImagePickerScreen = () => {
           }}
         />
       )}
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: 'column',
   },
   image: {
     width: 200,
@@ -79,7 +80,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   emotionContainer: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
@@ -97,6 +98,9 @@ const styles = StyleSheet.create({
   selectedEmotion: {
     backgroundColor: '#007BFF',
   },
+  textstyles: {
+    color: 'white'
+  }
 });
 
 export default ImagePickerScreen;

@@ -34,20 +34,22 @@ export const Routes = () => {
   // }, [])
 
     return (
-      <NavigationContainer theme={Theme}>
-        {/* {user ? 
+      <SafeAreaView style={styles.safearea}>
+        <NavigationContainer theme={Theme}>
+          {/* {user ? 
+            <View style={styles.safearea}>
+              <StatusBar barStyle="light-content" />
+              <Tabs />
+            </View>
+          : 
+            <AuthStack />
+          } */}
           <View style={styles.safearea}>
             <StatusBar barStyle="light-content" />
             <Tabs />
           </View>
-        : 
-          <AuthStack />
-        } */}
-        <View style={styles.safearea}>
-          <StatusBar barStyle="light-content" />
-          <Tabs />
-        </View>
-      </NavigationContainer>
+        </NavigationContainer>
+      </SafeAreaView>
     );
 };
 
