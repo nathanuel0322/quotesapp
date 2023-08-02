@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, Button, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
-const emotions = ['Happy', 'Sad', 'Angry', 'Surprised', 'Neutral'];
+const emotions = ["Alone", "Angry", "Anniversary", "Attitude", "Awesome", "Awkward Moment", "Beard", "Beautiful", "Best", "Bike", "Birthday", "Break Up", "Brother", "Busy"] 
 
-const ImagePickerScreen = () => {
+export default function Create() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedEmotion, setSelectedEmotion] = useState(null);
 
@@ -26,7 +26,7 @@ const ImagePickerScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}>
+    <ScrollView contentContainerStyle={styles.container}>
       {selectedImage ? (
         <Image source={{ uri: selectedImage }} style={styles.image} />
       ) : (
@@ -35,22 +35,20 @@ const ImagePickerScreen = () => {
         </TouchableOpacity>
       )}
 
-      <View style={styles.emotionContainer}>
+      <View contentContainerStyle={styles.emotionContainer}>
         <Text style={[styles.emotionLabel, styles.textstyles]}>
           Select Emotion:
         </Text>
-        {emotions.map((emotion) => (
-          <TouchableOpacity
-            key={emotion}
-            style={[
-              styles.emotionButton,
-              selectedEmotion === emotion && styles.selectedEmotion,
-            ]}
-            onPress={() => handleEmotionSelection(emotion)}
-          >
-            <Text>{emotion}</Text>
-          </TouchableOpacity>
-        ))}
+        <View style={styles.emotionview}>
+          {emotions.map((emotion) => (
+            <TouchableOpacity key={emotion}
+              style={[styles.emotionButton, selectedEmotion === emotion && styles.selectedEmotion,]}
+              onPress={() => handleEmotionSelection(emotion)}
+            >
+              <Text style={{textAlign: 'center'}}>{emotion}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
 
       {selectedImage && selectedEmotion && (
@@ -72,6 +70,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent:'center',
   },
   image: {
     width: 200,
@@ -80,13 +80,16 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   emotionContainer: {
+    flex: 1,
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    // marginBottom: 20,
+    width: '100%',
   },
   emotionLabel: {
     marginRight: 10,
+    textAlign: 'center',
   },
   emotionButton: {
     paddingHorizontal: 10,
@@ -94,13 +97,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#e0e0e0',
     borderRadius: 5,
     marginHorizontal: 5,
+    width: '40%',
+    height: '10%',
+    marginVertical: '1%'
   },
   selectedEmotion: {
     backgroundColor: '#007BFF',
   },
   textstyles: {
     color: 'white'
+  },
+  emotionview: {
+    flex: 1, 
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    // flexBasis: '50%',
+    // columnGap: 10,
+    // width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   }
 });
-
-export default ImagePickerScreen;
