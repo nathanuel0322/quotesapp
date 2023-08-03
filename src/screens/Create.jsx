@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, Button, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, Button, Image, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+// import db from '../../firebase.js';
+// import { v4 as uuidv4 } from 'uuid';
 
 const emotions = ["Alone", "Angry", "Anniversary", "Attitude", "Awesome", "Awkward Moment", "Beard", "Beautiful", "Best", "Bike", "Birthday", "Break Up", "Brother", "Busy"] 
 
 export default function Create() {
+  const collectionRef = collection(db, 'posts'); 
+
+  // const [posts, setPosts] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedEmotion, setSelectedEmotion] = useState(null);
+  const [text, setText] = useState('');
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -25,17 +31,50 @@ export default function Create() {
     setSelectedEmotion(emotion);
   };
 
+  const handleDeselectPhoto = () => {
+    setSelectedImage(null);
+    setSelectedEmotion(null);
+    setText('');
+  };
+
+  // const handleStoreSelection = async () => {
+  //   const newPost = {
+  //     id: uuidv4(),
+  //     image: selectedImage,
+  //     emotion: selectedEmotion,
+  //     text: text,
+  //     createdAt: serverTimestamp(),
+  //     lastUpdate: sesrverTimestamp(),
+  //   };
+
+  //   try {
+  //     const postRef = doc(collectionRef, newPost.id);
+  //     await setDoc(postRef, newPost);   
+  //   } catch {
+  //     console.error(error);
+  //   }
+  // }
+  
+  
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {selectedImage ? (
-        <Image source={{ uri: selectedImage }} style={styles.image} />
-      ) : (
-        <TouchableOpacity onPress={pickImage}>
-          <Text style={styles.textstyles}>Select a Photo</Text>
-        </TouchableOpacity>
-      )}
+      <View style={styles.imageContainer}>
+        {selectedImage ? (
+          <View>
+            <Image source={{ uri: selectedImage }} style={styles.image} resizeMode="contain" />
+            <TouchableOpacity onPress={handleDeselectPhoto}>
+              <Text style={styles.deselectPhotoText}>Deselect Photo</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity onPress={pickImage}>
+            <Text style={styles.textstyles}>Select a Photo</Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
-      <View contentContainerStyle={styles.emotionContainer}>
+      <View style={styles.emotionContainer}>
         <Text style={[styles.emotionLabel, styles.textstyles]}>
           Select Emotion:
         </Text>
@@ -51,6 +90,15 @@ export default function Create() {
         </View>
       </View>
 
+      {/* Add TextInput for entering text */}
+      <TextInput
+        style={styles.textInput}
+        value={text}
+        onChangeText={setText}
+        placeholder="Enter your motivational message here"
+        placeholderTextColor="#FFFFFF80"
+      />
+
       {selectedImage && selectedEmotion && (
         <Button
           title="Store Selection"
@@ -58,6 +106,10 @@ export default function Create() {
             // You can store the selected image URI and emotion in your state management system or save to a database here.
             console.log('Selected Image:', selectedImage);
             console.log('Selected Emotion:', selectedEmotion);
+            console.log('Text:', text);
+
+            // handleStoreSelection();
+
             // Optionally, you can navigate to another screen or perform other actions after storing the selection.
           }}
         />
@@ -73,18 +125,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent:'center',
   },
+  imageContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 40, // Adjusted marginBottom to move the Image higher
+  },
   image: {
     width: 200,
     height: 200,
-    resizeMode: 'cover',
-    marginBottom: 20,
+    resizeMode: 'contain',
   },
   emotionContainer: {
     flex: 1,
-    flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
-    // marginBottom: 20,
+    justifyContent: 'flex-end',
+    marginBottom: 30, // Adjusted marginBottom to move the Emotion field higher
     width: '100%',
   },
   emotionLabel: {
@@ -98,23 +154,34 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginHorizontal: 5,
     width: '40%',
-    height: '10%',
-    marginVertical: '1%'
+    height: 30, // Fixed size box for emotions
+    marginVertical: '1%',
   },
   selectedEmotion: {
     backgroundColor: '#007BFF',
   },
   textstyles: {
-    color: 'white'
+    color: 'white',
   },
   emotionview: {
-    flex: 1, 
+    flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    // flexBasis: '50%',
-    // columnGap: 10,
-    // width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-  }
+  },
+  textInput: {
+    backgroundColor: '#FFFFFF40',
+    color: '#FFFFFF',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 5,
+    marginBottom: '25%',
+    width: '90%',
+  },
+  deselectPhotoText: {
+    color: 'red',
+    fontSize: 18,
+    marginTop: 10,
+  },
 });
