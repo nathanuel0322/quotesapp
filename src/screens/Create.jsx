@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, Button, Image, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import SearchBar from '../components/create/SearchBar';
+import  { collection } from 'firebase/firestore';
+import { db } from '../../firebase';
 
 const emotions = ["Alone", "Angry", "Anniversary", "Attitude", "Awesome", "Awkward Moment", "Beard", "Beautiful", "Best", "Bike", "Birthday", "Break Up", "Brother", "Busy"] 
 
