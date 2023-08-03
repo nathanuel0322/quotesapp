@@ -1,19 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Button, Image, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import SearchBar from '../components/create/SearchBar';
-import  { collection } from 'firebase/firestore';
+import  { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 const emotions = ["Alone", "Angry", "Anniversary", "Attitude", "Awesome", "Awkward Moment", "Beard", "Beautiful", "Best", "Bike", "Birthday", "Break Up", "Brother", "Busy"] 
 
 export default function Create() {
-  const collectionRef = collection(db, 'posts'); 
-
-  // const [posts, setPosts] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedEmotion, setSelectedEmotion] = useState(null);
   const [text, setText] = useState('');
+
+  const handleStoreSelection = async () => {
+
+    await addDoc(collection(db, 'posts'), {text, selectedEmotion});
+  }
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -30,33 +32,12 @@ export default function Create() {
 
   const handleEmotionSelection = (emotion) => {
     setSelectedEmotion(emotion);
+    console.log('Selected Emotion:', selectedEmotion)
   };
 
   const handleDeselectPhoto = () => {
     setSelectedImage(null);
-    setSelectedEmotion(null);
-    setText('');
   };
-
-  // const handleStoreSelection = async () => {
-  //   const newPost = {
-  //     id: uuidv4(),
-  //     image: selectedImage,
-  //     emotion: selectedEmotion,
-  //     text: text,
-  //     createdAt: serverTimestamp(),
-  //     lastUpdate: sesrverTimestamp(),
-  //   };
-
-  //   try {
-  //     const postRef = doc(collectionRef, newPost.id);
-  //     await setDoc(postRef, newPost);   
-  //   } catch {
-  //     console.error(error);
-  //   }
-  // }
-  
-  
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -86,7 +67,7 @@ export default function Create() {
                 // selectedEmotion === emotion && styles.selectedEmotion,
                 {backgroundColor: `hsl(${Math.random() * 360}, 50%, 60%)`}
               ]}
-              // onPress={() => handleEmotionSelection(emotion)}
+              onPress={() => handleEmotionSelection(emotion)}
             >
               <Text style={{textAlign: 'center'}}>{emotion}</Text>
             </TouchableOpacity>
@@ -112,7 +93,7 @@ export default function Create() {
             console.log('Selected Emotion:', selectedEmotion);
             console.log('Text:', text);
 
-            // handleStoreSelection();
+            handleStoreSelection();
 
             // Optionally, you can navigate to another screen or perform other actions after storing the selection.
           }}
