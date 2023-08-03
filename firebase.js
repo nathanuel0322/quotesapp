@@ -24,7 +24,7 @@ export const Firebase = initializeApp(firebaseConfig);
 
 // Initialize Firebase Authentication and get a reference to the service
 export const auth = getAuth(Firebase);
-
+export default getFirestore(Firebase);
 // const firestore = getFirestore(Firebase);
 // getDoc(doc(firestore, "Businesses", "BizData"))
 // // .then is genuinely the most essential thing here as it threw me off for hours
