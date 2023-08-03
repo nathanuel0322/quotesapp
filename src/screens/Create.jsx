@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Button, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import SearchBar from '../components/create/SearchBar';
 
 const emotions = ["Alone", "Angry", "Anniversary", "Attitude", "Awesome", "Awkward Moment", "Beard", "Beautiful", "Best", "Bike", "Birthday", "Break Up", "Brother", "Busy"] 
 
@@ -21,12 +22,9 @@ export default function Create() {
     }
   };
 
-  const handleEmotionSelection = (emotion) => {
-    setSelectedEmotion(emotion);
-  };
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <SearchBar />
       {selectedImage ? (
         <Image source={{ uri: selectedImage }} style={styles.image} />
       ) : (
@@ -34,7 +32,6 @@ export default function Create() {
           <Text style={styles.textstyles}>Select a Photo</Text>
         </TouchableOpacity>
       )}
-
       <View contentContainerStyle={styles.emotionContainer}>
         <Text style={[styles.emotionLabel, styles.textstyles]}>
           Select Emotion:
@@ -42,8 +39,11 @@ export default function Create() {
         <View style={styles.emotionview}>
           {emotions.map((emotion) => (
             <TouchableOpacity key={emotion}
-              style={[styles.emotionButton, selectedEmotion === emotion && styles.selectedEmotion,]}
-              onPress={() => handleEmotionSelection(emotion)}
+              style={[styles.emotionButton,
+                // selectedEmotion === emotion && styles.selectedEmotion,
+                {backgroundColor: `hsl(${Math.random() * 360}, 50%, 60%)`}
+              ]}
+              // onPress={() => handleEmotionSelection(emotion)}
             >
               <Text style={{textAlign: 'center'}}>{emotion}</Text>
             </TouchableOpacity>
@@ -72,6 +72,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent:'center',
+    marginTop: '5%'
   },
   image: {
     width: 200,
@@ -94,12 +95,14 @@ const styles = StyleSheet.create({
   emotionButton: {
     paddingHorizontal: 10,
     paddingVertical: 5,
-    backgroundColor: '#e0e0e0',
     borderRadius: 5,
     marginHorizontal: 5,
     width: '40%',
     height: '10%',
-    marginVertical: '1%'
+    marginVertical: '1%',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   selectedEmotion: {
     backgroundColor: '#007BFF',
