@@ -7,11 +7,11 @@ import Globals from '../../GlobalValues';
 
 const Providers = () => {
   Globals.globalDimensions = useWindowDimensions();
+
   return (
-    // remove hidden code when ready to use authentication
-    // <AuthProvider>
+    <AuthProvider>
       <Routes />
-    // </AuthProvider>
+    </AuthProvider>
   );
 }
 

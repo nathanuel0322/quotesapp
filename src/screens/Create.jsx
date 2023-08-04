@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, Image, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import SearchBar from '../components/create/SearchBar';
 import  { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
@@ -50,8 +49,8 @@ export default function Create() {
             </TouchableOpacity>
           </View>
         ) : (
-          <TouchableOpacity onPress={pickImage}>
-            <Text style={styles.textstyles}>Select a Photo</Text>
+          <TouchableOpacity onPress={pickImage} style={styles.clickable}>
+            <Text style={[styles.textstyles, styles.buttontext]}>Upload a Photo</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -172,4 +171,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginTop: 10,
   },
+  clickable: {
+    borderRadius: 12,
+    backgroundColor: 'lightblue',
+    padding: 8
+  },
+  buttontext: {
+    color: 'black',
+    fontWeight: '700',
+    fontSize: 16
+  }
 });

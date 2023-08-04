@@ -1,52 +1,42 @@
 import React, {useContext, useState, useEffect} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-// import {onAuthStateChanged } from 'firebase/auth';
-// import {AuthContext} from './AuthProvider';
-import Theme from './theme';
 import { SafeAreaView, StatusBar, StyleSheet, View} from 'react-native';
-// import Globals  from '../../GlobalValues';
+import {NavigationContainer} from '@react-navigation/native';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../../../firebase';
+import { AuthContext } from './AuthProvider';
 
-// import AuthStack from './AuthStack';
+import Theme from './theme';
+import Globals  from '../../GlobalValues';
 import Tabs from './bottomNavigation';
+import AuthStack from './AuthStack';
 
-// import {firebaseConfig, Firebase, auth} from '../../../firebase';
 
 export const Routes = () => {
-  {/* Remove hidden code when ready to implement authentication */}
-
-  // const {user, setUser} = useContext(AuthContext);
-  // const [initializing, setInitializing] = useState(true);
+  const {user, setUser} = useContext(AuthContext);
   
-  // if (auth.currentUser != null){
-  //   Globals.currentUserId = auth.currentUser.uid;
-  // }
+  if (auth.currentUser != null){
+    Globals.currentUserId = auth.currentUser.uid;
+  }
 
-  // onAuthStateChanged(auth, (user) => {
-  //   setUser(user);
-  //   if (initializing) setInitializing(false);
-  // });
+  onAuthStateChanged(auth, (user) => {
+    setUser(user);
+  });
 
-  // useEffect(() => {
-  //   const unsubscribe = onAuthStateChanged(auth, setUser); 
-  //   return () => {
-  //     unsubscribe(); 
-  //   }; 
-  // }, [])
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, setUser); 
+    return () => unsubscribe(); 
+  }, [])
 
     return (
       <SafeAreaView style={styles.safearea}>
         <NavigationContainer theme={Theme}>
-          {/* {user ? 
-            <View style={styles.safearea}>
-              <StatusBar barStyle="light-content" />
-              <Tabs />
-            </View>
-          : 
-            <AuthStack />
-          } */}
           <View style={styles.safearea}>
             <StatusBar barStyle="light-content" />
-            <Tabs />
+            {user ? 
+              <Tabs />
+            : 
+              <AuthStack />
+            }
           </View>
         </NavigationContainer>
       </SafeAreaView>
@@ -54,9 +44,9 @@ export const Routes = () => {
 };
 
 const styles = StyleSheet.create({
-    safearea: {
-      width: '100%',
-      height: '100%',
-      backgroundColor: '#0A0B14',
-    }, 
-  });
+  safearea: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#0A0B14',
+  }, 
+});

@@ -1,9 +1,10 @@
 import React, {useContext, useState} from 'react';
-import {View, Text, TouchableOpacity, Image, StyleSheet} from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Alert} from 'react-native';
 import FormInput from '../components/global/FormInput';
 import FormButton from '../components/global/FormButton';
 import { AuthContext } from '../components/global/AuthProvider';
 import GlobalStyles from '../GlobalStyles';
+import {  } from 'react-native';
 
 const SignupScreen = ({navigation}) => {
   const [email, setEmail] = useState();
@@ -28,7 +29,7 @@ const SignupScreen = ({navigation}) => {
 
       <FormInput
         labelValue={password}
-        onChangeText={(userPassword) => setPassword(userPassword)}
+        onChangeText={setPassword}
         placeholderText="Password"
         iconType="lock"
         secureTextEntry={true}
@@ -36,7 +37,7 @@ const SignupScreen = ({navigation}) => {
       
       <FormInput
         labelValue={confirmPassword}
-        onChangeText={(userPassword) => setPassword(userPassword)}
+        onChangeText={setConfirmPassword}
         placeholderText="Confirm Password"
         iconType="lock"
         secureTextEntry={true}
@@ -44,7 +45,13 @@ const SignupScreen = ({navigation}) => {
 
       <FormButton
         buttonTitle="Sign Up"
-        onPress={() => register(email, password)}
+        onPress={() => {
+          if (password === confirmPassword) {
+            register(email, password)
+          } else {
+            Alert.alert("Passwords must match!")
+          }
+        }}
       />
 
       <TouchableOpacity
