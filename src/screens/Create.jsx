@@ -3,6 +3,7 @@ import { View, Text, Button, Image, StyleSheet, TouchableOpacity, ScrollView, Te
 import * as ImagePicker from 'expo-image-picker';
 import  { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+import { ImageEditor } from 'expo-crop-image';
 
 const emotions = ["Alone", "Angry", "Anniversary", "Attitude", "Awesome", "Awkward Moment", "Beard", "Beautiful", "Best", "Bike", "Birthday", "Break Up", "Brother", "Busy"] 
 
@@ -12,7 +13,6 @@ export default function Create() {
   const [text, setText] = useState('');
 
   const handleStoreSelection = async () => {
-
     await addDoc(collection(db, 'posts'), {text, selectedEmotion});
   }
 
@@ -24,8 +24,10 @@ export default function Create() {
       quality: 1,
     });
 
-    if (!result.cancelled) {
-      setSelectedImage(result.uri);
+    console.log("result of picked image:", result)
+
+    if (!result.canceled) {
+      setSelectedImage(result.assets[0].uri);
     }
   };
 
@@ -55,16 +57,27 @@ export default function Create() {
         )}
       </View>
 
+      <ImageEditor
+        fixedAspectRatio={3 / 4}
+        imageUri={Image.resolveAssetSource(require('../assets/temp/temp3.png')).uri}
+        onEditingCancel={() => {
+          console.log("onEditingCancel");
+        }}
+        onEditingComplete={(image) => {
+          console.log(image);
+        }}
+      />
+
       <View style={styles.emotionContainer}>
         <Text style={[styles.emotionLabel, styles.textstyles]}>
           Select Emotion:
         </Text>
         <View style={styles.emotionview}>
-          {emotions.map((emotion) => (
+          {emotions.map((emotion, index) => (
             <TouchableOpacity key={emotion}
               style={[styles.emotionButton,
                 // selectedEmotion === emotion && styles.selectedEmotion,
-                {backgroundColor: `hsl(${Math.random() * 360}, 50%, 60%)`}
+                {backgroundColor: `hsl(${index * (360 / emotions.length)}, 50%, 60%)`}
               ]}
               onPress={() => handleEmotionSelection(emotion)}
             >
