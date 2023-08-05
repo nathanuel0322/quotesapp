@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Button, Image, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import 'react-native-get-random-values';
+import React, { useState } from 'react';
+import { View, Text, Button, Image, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import  { collection, addDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import  { collection, addDoc, doc } from 'firebase/firestore';
+import { db, storage, auth } from '../../firebase';
 import { ImageEditor } from 'expo-crop-image';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
+import { v4 as uuidv4 } from "uuid";
 
 const emotions = ["Alone", "Angry", "Anniversary", "Attitude", "Awesome", "Awkward Moment", "Beard", "Beautiful", "Best", "Bike", "Birthday", "Break Up", "Brother", "Busy"] 
 
@@ -11,6 +14,8 @@ export default function Create() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedEmotion, setSelectedEmotion] = useState(null);
   const [text, setText] = useState('');
+  const [showImageEditor, setShowImageEditor] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
   const handleStoreSelection = async () => {
     await addDoc(collection(db, 'posts'), {text, selectedEmotion});
@@ -19,8 +24,6 @@ export default function Create() {
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
       quality: 1,
     });
 
@@ -28,6 +31,7 @@ export default function Create() {
 
     if (!result.canceled) {
       setSelectedImage(result.assets[0].uri);
+      setShowImageEditor(true)
     }
   };
 
@@ -40,33 +44,76 @@ export default function Create() {
     setSelectedImage(null);
   };
 
+  async function saveQuote() {
+    setUploading(true);
+    const uploadUrl = await uploadImageAsync(selectedImage);
+    await addDoc(collection(db, 'quotes'), {
+      selectedEmotion, text, uid: auth.currentUser.uid, imglink: uploadUrl
+    })
+    console.log("download url is:", uploadUrl)
+    setUploading(false)
+    Alert.alert("Quote uploaded!")
+  }
+
+  async function uploadImageAsync(uri) {
+    const blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        console.log(e);
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", uri, true);
+      xhr.send(null);
+    });
+  
+    const fileRef = ref(storage, `quotepics/${uuidv4()}`);
+    await uploadBytes(fileRef, blob)
+      .then(() => {
+        console.log("Uploaded image!")
+      })
+  
+    // We're done with the blob, close and release it
+    blob.close();
+  
+    return await getDownloadURL(fileRef);
+  }
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container]}>
       <View style={styles.imageContainer}>
         {selectedImage ? (
           <View>
             <Image source={{ uri: selectedImage }} style={styles.image} resizeMode="contain" />
-            <TouchableOpacity onPress={handleDeselectPhoto}>
-              <Text style={styles.deselectPhotoText}>Deselect Photo</Text>
+            <TouchableOpacity onPress={handleDeselectPhoto} style={[styles.clickable, {backgroundColor: 'red', marginTop: '2%'}]}>
+              <Text style={[styles.buttontext, styles.deselectPhotoText]}>Deselect Photo</Text>
             </TouchableOpacity>
           </View>
         ) : (
-          <TouchableOpacity onPress={pickImage} style={styles.clickable}>
+          <TouchableOpacity onPress={() => pickImage()} style={styles.clickable}>
             <Text style={[styles.textstyles, styles.buttontext]}>Upload a Photo</Text>
           </TouchableOpacity>
         )}
       </View>
 
-      <ImageEditor
-        fixedAspectRatio={3 / 4}
-        imageUri={Image.resolveAssetSource(require('../assets/temp/temp3.png')).uri}
-        onEditingCancel={() => {
-          console.log("onEditingCancel");
-        }}
-        onEditingComplete={(image) => {
-          console.log(image);
-        }}
-      />
+      {showImageEditor &&
+        <ImageEditor
+          fixedAspectRatio={3 / 4}
+          imageUri={selectedImage}
+          onEditingCancel={() => {
+            console.log("onEditingCancel");
+            setShowImageEditor(false)
+          }}
+          onEditingComplete={(image) => {
+            console.log(image);
+            setSelectedImage(image.uri)
+            setShowImageEditor(false)
+          }}
+        />
+      }
 
       <View style={styles.emotionContainer}>
         <Text style={[styles.emotionLabel, styles.textstyles]}>
@@ -89,12 +136,19 @@ export default function Create() {
 
       {/* Add TextInput for entering text */}
       <TextInput
-        style={styles.textInput}
+        style={[styles.textInput, 
+          // {marginBottom: '50%'}
+        ]}
         value={text}
         onChangeText={setText}
         placeholder="Enter your motivational message here"
         placeholderTextColor="#FFFFFF80"
       />
+
+      <TouchableOpacity style={styles.clickable} onPress={() => saveQuote()} disabled={uploading}>
+        <Text style={styles.buttontext}>{uploading ? "Uploading..." : "Create"}</Text>
+      </TouchableOpacity>
+
 
       {selectedImage && selectedEmotion && (
         <Button
@@ -121,12 +175,13 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent:'center',
-    marginTop: '5%'
+    marginTop: '5%',
   },
   imageContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    maxHeight: 200,
     marginBottom: 40, // Adjusted marginBottom to move the Image higher
   },
   image: {
@@ -137,9 +192,10 @@ const styles = StyleSheet.create({
   emotionContainer: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    marginBottom: 30, // Adjusted marginBottom to move the Emotion field higher
+    justifyContent: 'center',
+   // marginBottom: 30,  Adjusted marginBottom to move the Emotion field higher
     width: '100%',
+    maxHeight: 300
   },
   emotionLabel: {
     marginRight: 10,
@@ -169,6 +225,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'center',
+    maxHeight: 250
   },
   textInput: {
     backgroundColor: '#FFFFFF40',
@@ -176,18 +233,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 5,
-    marginBottom: '25%',
+    marginBottom: 10,
     width: '90%',
   },
   deselectPhotoText: {
-    color: 'red',
+    color: 'white',
     fontSize: 18,
-    marginTop: 10,
+    textAlign: 'center'
   },
   clickable: {
     borderRadius: 12,
     backgroundColor: 'lightblue',
-    padding: 8
+    padding: 8,
   },
   buttontext: {
     color: 'black',
