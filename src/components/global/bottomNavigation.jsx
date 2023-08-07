@@ -75,7 +75,11 @@ export default function Tabs({ navcontainerRef }) {
             ),
           }}
         />
-        <Tab.Screen name="SettingsStack" component={SettingsStack} options={{ tabBarButton: () => null, headerShown: false }} />
+        <Tab.Screen
+          name="SettingsStack"
+          component={SettingsStack}
+          options={{ tabBarButton: () => null, headerShown: false }}
+        />
       </Tab.Navigator>
       <TouchableOpacity style={styles.settingsbutton} onPress={() => {
         bottomSheetRef.current.expand();

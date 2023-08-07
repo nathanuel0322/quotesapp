@@ -42,7 +42,7 @@ export default function SettingsStack({navigation}) {
                 options={{headerShown: false}} 
             />
             <Stack.Screen 
-                name='Account Details'
+                name='AccountDetails'
                 component={AccountDetails}
                 options={{headerShown: false}} 
             />

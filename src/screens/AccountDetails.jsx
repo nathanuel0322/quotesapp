@@ -1,20 +1,16 @@
-import React, {useEffect} from 'react';
+import React, { useEffect, useState } from 'react';
 import {Text, View, StyleSheet, TouchableOpacity} from 'react-native';
 import { BlurView } from 'expo-blur';
 import GlobalStyles from '../GlobalStyles';
 import Globals from '../GlobalValues';
-
-import ArrowLeftIcon from '../assets/icons/arrowlefticon.svg'; 
-import WalletIcon from '../assets/icons/walleticon.svg'; 
-import LanguageIcon from '../assets/icons/languageicon.svg';
-import CountryIcon from '../assets/icons/countryicon.svg';
-import SocialMediaIcon from '../assets/icons/socialmediaicon.svg';
-import PrivacyIcon from '../assets/icons/privacyicon.svg';
-import AccountIcon from '../assets/icons/accountdetailicon.svg';
-import Sepline from '../assets/icons/sepline.svg';
-import AboutIcon from '../assets/icons/info-transparent.svg';
+import FormInput from '../components/global/FormInput';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { auth } from '../../firebase';
+import ArrowLeftIcon from '../assets/icons/arrowlefticon.svg';
 
 export default function AccountDetails({navigation}) {
+    let storedname = AsyncStorage.getItem('displayname')
+    const [currentName, setCurrentName] = useState(storedname ? storedname : auth.currentUser.displayName);
 
   useEffect(() => {
     navigation.getParent()?.setOptions({
@@ -65,46 +61,17 @@ export default function AccountDetails({navigation}) {
             <Text style={{color: 'white', fontFamily: GlobalStyles.fontSet.fontsemibold, fontSize: 20, 
                 paddingLeft: Globals.globalDimensions.width * .215, top: 10,}}
             >
-                Settings
+                Account Details
             </Text>
         </View>
-        <View style={{left: 0}}>
-            <TouchableOpacity style={[settingsstyles.settingspressables, {paddingTop: 24 ,paddingBottom: 32,}]} onPress={() => [console.log('Wallet pressed')]}>
-                <WalletIcon />
-                <Text style={settingsstyles.settingspressablestext}>Wallet</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={settingsstyles.settingspressables} onPress={() => console.log(navigation.getState().index)}>
-                <LanguageIcon />
-                <Text style={settingsstyles.settingspressablestext}>Language</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={settingsstyles.settingspressables}>
-                <CountryIcon />
-                <Text style={settingsstyles.settingspressablestext}>Country</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={settingsstyles.settingspressables}>
-                <SocialMediaIcon />
-                <Text style={settingsstyles.settingspressablestext}>Social Media</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={settingsstyles.settingspressables}>
-                <PrivacyIcon />
-                <Text style={settingsstyles.settingspressablestext}>Privacy</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={settingsstyles.settingspressables}>
-                <AccountIcon />
-                <Text style={settingsstyles.settingspressablestext}>Account Details</Text>
-            </TouchableOpacity>
-        </View>
-        <View style={{paddingTop: 120}}>
-            <View>
-                <Sepline width={Globals.globalDimensions.width} height={1} preserveAspectRatio="none" />
-            </View>
-            <TouchableOpacity style={[settingsstyles.settingspressables, {paddingVertical: 35,}]}>
-                <AboutIcon width={24} height={24}/>
-                <Text style={settingsstyles.settingspressablestext}>About</Text>
+        <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <FormInput labelValue={currentName} onChangeText={setCurrentName} placeholderText="Username" autoCapitalize="none" autoCorrect={false} />
+            <TouchableOpacity style={settingsstyles.changes}>
+                <Text style={[settingsstyles.settingspressablestext, { color: 'black' }]}>Confirm Changes</Text>
             </TouchableOpacity>
         </View>
     </View>
-  );
+  )
 }
 
 const settingsstyles = StyleSheet.create({
@@ -121,4 +88,8 @@ const settingsstyles = StyleSheet.create({
     fontSize: 18, 
     marginLeft: 9,
   },
+
+  changes: {
+    backgroundColor: '#FF8C00'
+  }
 })

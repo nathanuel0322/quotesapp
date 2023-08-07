@@ -2,6 +2,7 @@ import React, {createContext, useState} from 'react';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
 import {auth} from '../../../firebase';
 import ToastManager, { Toast } from 'toastify-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const AuthContext = createContext();
 
@@ -38,7 +39,8 @@ export const AuthProvider = ({children}) => {
             .then(async(userCredential) => {
               console.log('Account created & signed in!')
               await updateProfile(userCredential.user, { displayName: username })
-                .then(() => {
+                .then(async() => {
+                  await AsyncStorage.setItem('displayname', username)
                   Toast.success('Signed in!');
                 })
             })

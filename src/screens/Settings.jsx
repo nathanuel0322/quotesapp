@@ -40,7 +40,7 @@ export default function Settings({navigation}) {
                 <PrivacyIcon />
                 <Text style={settingsstyles.settingspressablestext}>Privacy</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={settingsstyles.settingspressables}>
+            <TouchableOpacity style={settingsstyles.settingspressables} onPress={() => navigation.navigate('AccountDetails')}>
                 <AccountIcon />
                 <Text style={settingsstyles.settingspressablestext}>Account Details</Text>
             </TouchableOpacity>
