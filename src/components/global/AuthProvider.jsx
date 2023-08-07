@@ -1,7 +1,7 @@
 import React, {createContext, useState} from 'react';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { Alert } from 'react-native';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
 import {auth} from '../../../firebase';
+import ToastManager, { Toast } from 'toastify-react-native';
 
 export const AuthContext = createContext();
 
@@ -15,47 +15,36 @@ export const AuthProvider = ({children}) => {
         login: async (email, password) => {
           await signInWithEmailAndPassword(auth, email, password)
           .then(() => {
-            Alert.alert('Signed in!', '', [
-              { text: 'OK', onPress: () => console.log('User account signed in!')},
-            ]);
+            Toast.success('Signed in!');
           })
           .catch(error => {
             if (error.code === 'auth/invalid-email') {
-              Alert.alert('That email address is invalid!', '', [
-                { text: 'OK', onPress: () => console.log('That email address is invalid!')},
-              ]);
+              Toast.success('That email address is invalid!');
             }
             if (error.code === 'auth/user-not-found') {
-              Alert.alert('There is no user account linked to this email!', '', [
-                { text: 'OK', onPress: () => console.log('There is no user account linked to this email!')},
-              ]);
+              Toast.success('There is no user account linked to this email!');
             }
             if (error.code === 'auth/wrong-password') {
-              Alert.alert('Incorrect password! Please try again.', '', [
-                { text: 'OK', onPress: () => console.log('Incorrect password! Please try again.')},
-              ]);
+              Toast.success('Incorrect password! Please try again.');
             }
             if (error.code === 'auth/user-disabled') {
-              Alert.alert('This user is currently disabled.', '', [
-                { text: 'OK', onPress: () => console.log('This user is currently disabled.')},
-              ]);
+              Toast.success('This user is currently disabled.');
             }
             console.error(error);
           });
         },
-        register: async (email, password) => {
+        register: async (email, username, password) => {
           await createUserWithEmailAndPassword(auth, email, password)
-            .then(() => {
+            .then(async(userCredential) => {
               console.log('Account created & signed in!')
-              Alert.alert('Signed in!', '', [
-                { text: 'OK', onPress: () => console.log('User account created & signed in!')},
-              ]);
+              await updateProfile(userCredential.user, { displayName: username })
+                .then(() => {
+                  Toast.success('Signed in!');
+                })
             })
             .catch(error => {
               if (error.code === 'auth/email-already-in-use') {
-                Alert.alert('That email address is already in use!', '', [
-                  { text: 'OK', onPress: () => console.log('Email address is already in use')},
-                ]);
+                Toast.success('That email address is already in use!');
               }
               if (error.code === 'auth/invalid-email') {
                 console.log('This email is invalid');
@@ -71,12 +60,14 @@ export const AuthProvider = ({children}) => {
         },
         logout: async () => {
           await signOut(auth)
-            .then(() => console.log('Signed out!'))
+            .then(() => Toast.success('Signed out!'))
             .catch(error => {
               console.error(error);
             });
         },
-      }}>
+      }}
+    >
+      <ToastManager />
       {children}
     </AuthContext.Provider>
   );

@@ -1,4 +1,4 @@
-import React, {useContext, useState, useEffect} from 'react';
+import React, {useContext, useState, useEffect, useRef, createRef} from 'react';
 import { SafeAreaView, StatusBar, StyleSheet, View} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -10,9 +10,9 @@ import Globals  from '../../GlobalValues';
 import Tabs from './bottomNavigation';
 import AuthStack from './AuthStack';
 
-
 export const Routes = () => {
   const {user, setUser} = useContext(AuthContext);
+  const navcontainerRef = createRef();
   
   if (auth.currentUser != null){
     Globals.currentUserId = auth.currentUser.uid;
@@ -29,11 +29,11 @@ export const Routes = () => {
 
     return (
       <SafeAreaView style={styles.safearea}>
-        <NavigationContainer theme={Theme}>
+        <NavigationContainer theme={Theme} ref={navcontainerRef}>
           <View style={styles.safearea}>
             <StatusBar barStyle="light-content" />
             {user ? 
-              <Tabs />
+              <Tabs navcontainerRef={navcontainerRef} />
             : 
               <AuthStack />
             }

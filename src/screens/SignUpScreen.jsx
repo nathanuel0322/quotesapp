@@ -4,10 +4,11 @@ import FormInput from '../components/global/FormInput';
 import FormButton from '../components/global/FormButton';
 import { AuthContext } from '../components/global/AuthProvider';
 import GlobalStyles from '../GlobalStyles';
-import {  } from 'react-native';
+import Toast from 'toastify-react-native';
 
 const SignupScreen = ({navigation}) => {
   const [email, setEmail] = useState();
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState();
   const [confirmPassword, setConfirmPassword] = useState();
 
@@ -23,6 +24,16 @@ const SignupScreen = ({navigation}) => {
         placeholderText="Email"
         iconType="user"
         keyboardType="email-address"
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+      
+      <FormInput
+        labelValue={username}
+        onChangeText={setUsername}
+        placeholderText="Username"
+        iconType="user"
+        keyboardType="default"
         autoCapitalize="none"
         autoCorrect={false}
       />
@@ -47,9 +58,9 @@ const SignupScreen = ({navigation}) => {
         buttonTitle="Sign Up"
         onPress={() => {
           if (password === confirmPassword) {
-            register(email, password)
+            register(email, username, password)
           } else {
-            Alert.alert("Passwords must match!")
+            Toast.error("Passwords must match!")
           }
         }}
       />
