@@ -33,7 +33,7 @@ export default function Slide({ item, currentcard, panResponder, rotateAndTransl
                         {item.text}
                     </Text>
                     <Text style={[styles.textstyles, { color: 'white', fontSize: 20, fontWeight: 'bold' }]}>
-                        Posted by {item.uid}
+                        Posted by {item.username}
                     </Text>
                     </View>
                 </View>
@@ -66,7 +66,7 @@ export default function Slide({ item, currentcard, panResponder, rotateAndTransl
                       {item.text}
                     </Text>
                     <Text style={[styles.textstyles, { color: 'white', fontSize: 20, fontWeight: 'bold' }]}>
-                      Posted by {item.uid}
+                      Posted by {item.username}
                     </Text>
                   </View>
                 </View>

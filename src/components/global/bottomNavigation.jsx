@@ -30,13 +30,23 @@ export default function Tabs({ navcontainerRef }) {
   let invisible = { display: 'none' }
   const [tabstyle, setTabStyle] = useState(visible);
 
+  const expandBottomSheet = () => {
+    console.log('expanding')
+    bottomSheetRef.current.expand();
+    setTabStyle(invisible);
+  };
+
+  const handleAnimate = useCallback((fromIndex) => {
+    console.log("fromIndex:", fromIndex)
+    if (fromIndex === 1) {
+      setTabStyle(visible);
+    }
+  }, []); // Empty dependency array to ensure stability
+
   return (
     <GestureHandlerRootView style={styles.container}>
       <Tab.Navigator
-        screenOptions={{
-          tabBarShowLabel: false,
-          tabBarStyle: tabstyle,
-        }}
+        screenOptions={{ tabBarShowLabel: false, tabBarStyle: tabstyle, }}
       >
         <Tab.Screen
           name="Brush"
@@ -81,26 +91,21 @@ export default function Tabs({ navcontainerRef }) {
           options={{ tabBarButton: () => null, headerShown: false }}
         />
       </Tab.Navigator>
-      <TouchableOpacity style={styles.settingsbutton} onPress={() => {
-        bottomSheetRef.current.expand();
-        setTabStyle(tabstyle === visible ? invisible : visible);
-      }}>
+      <TouchableOpacity style={styles.settingsbutton} onPress={() => expandBottomSheet()}>
         <Feather name="settings" size={30} color="white" />
       </TouchableOpacity>
       <BottomSheet
         ref={bottomSheetRef}
         index={0}
         snapPoints={snapPoints}
-        onAnimate={useCallback((fromIndex) => {
-          if (fromIndex === 1) { setTabStyle(visible) }
-        })}
+        onAnimate={handleAnimate}
         handleIndicatorStyle={{ backgroundColor: 'white', width: Globals.globalDimensions.width * .133333333, }}
         backgroundStyle={{ backgroundColor: GlobalStyles.colorSet.neutral11 }}
       >
         <View style={{ flex: 1, alignItems: 'flex-start', marginLeft: 27,}}>
           <Pressable style={styles.bottomsheetpressables} onPress={() => {
-            navcontainerRef.current?.navigate('SettingsStack')
             bottomSheetRef.current.close()
+            navcontainerRef.current?.navigate('SettingsStack')
           }}>
             <MaterialCommunityIcons name="dots-horizontal" size={24} color="white" />
             <Text style={styles.bottomsheetpressablestext}>Settings</Text>

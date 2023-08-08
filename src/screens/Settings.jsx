@@ -12,10 +12,14 @@ import PrivacyIcon from '../assets/icons/privacyicon.svg';
 import AccountIcon from '../assets/icons/accountdetailicon.svg';
 import Sepline from '../assets/icons/sepline.svg';
 import AboutIcon from '../assets/icons/info-transparent.svg';
+import ArrowLeftIcon from '../assets/icons/arrowlefticon.svg';
 
 export default function Settings({navigation}) {
   return (
     <View>
+        <TouchableOpacity style={settingsstyles.backbutton} onPress={() => navigation.goBack()}>
+          <ArrowLeftIcon width={30} height={30} />
+        </TouchableOpacity>
         <SettingsStackHeader navigation={navigation} currentPage={'Settings'} navtoPage={'ProfileMain'} hideRightButton={true} />
         <View style={{left: 0}}>
             <TouchableOpacity style={[settingsstyles.settingspressables, {paddingTop: 24 ,paddingBottom: 32,}]} 
@@ -40,7 +44,7 @@ export default function Settings({navigation}) {
                 <PrivacyIcon />
                 <Text style={settingsstyles.settingspressablestext}>Privacy</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={settingsstyles.settingspressables} onPress={() => navigation.navigate('AccountDetails')}>
+            <TouchableOpacity style={settingsstyles.settingspressables} onPress={() => navigation.navigate("AccountDetails")}>
                 <AccountIcon />
                 <Text style={settingsstyles.settingspressablestext}>Account Details</Text>
             </TouchableOpacity>
@@ -71,5 +75,14 @@ const settingsstyles = StyleSheet.create({
     fontFamily: GlobalStyles.fontSet.fontsemibold, 
     fontSize: 18, 
     marginLeft: 9,
+  },
+  backbutton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    backgroundColor: GlobalStyles.colorSet.blue6,
+    padding: 10,
+    borderRadius: 16,
+    zIndex: 999
   },
 })
