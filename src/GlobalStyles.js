@@ -22,7 +22,16 @@ const _fontSet = {
   fontsemibold: "Gilroy-SemiBold",
 };
 
+const visible = { display: 'flex', position: 'absolute', bottom: 25, left: 20, right: 20, elevation: 24,
+  backgroundColor: _colorSet.primary1, borderRadius: 25, height: 70, width: '91.4666667%',
+  shadowOffset: { width: 0, height: 12, }, shadowOpacity: 0.58, shadowRadius: 16.0, opacity: 1,
+}
+
+const invisible = { display: 'none' }
+
 export default GlobalStyles = {
   colorSet: _colorSet,
   fontSet: _fontSet,
+  showTabBar: visible,
+  hideTabBar: invisible
 };

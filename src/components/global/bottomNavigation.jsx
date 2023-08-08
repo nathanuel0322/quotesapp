@@ -23,23 +23,18 @@ export default function Tabs({ navcontainerRef }) {
   const { logout } = useContext(AuthContext);
   const bottomSheetRef = useRef(BottomSheet);
   const snapPoints = useMemo(() => [0.1, '25%'], []);
-  let visible = { display: 'flex', position: 'absolute', bottom: 25, left: 20, right: 20, elevation: 24,
-    backgroundColor: GlobalStyles.colorSet.primary1, borderRadius: 25, height: 70, width: Globals.globalDimensions.width * 0.914666667,
-    shadowOffset: { width: 0, height: 12, }, shadowOpacity: 0.58, shadowRadius: 16.0, opacity: 1,
-  }
-  let invisible = { display: 'none' }
-  const [tabstyle, setTabStyle] = useState(visible);
+  const [tabstyle, setTabStyle] = useState(GlobalStyles.showTabBar);
 
   const expandBottomSheet = () => {
     console.log('expanding')
     bottomSheetRef.current.expand();
-    setTabStyle(invisible);
+    setTabStyle(GlobalStyles.hideTabBar);
   };
 
   const handleAnimate = useCallback((fromIndex) => {
     console.log("fromIndex:", fromIndex)
     if (fromIndex === 1) {
-      setTabStyle(visible);
+      setTabStyle(GlobalStyles.showTabBar);
     }
   }, []); // Empty dependency array to ensure stability
 
