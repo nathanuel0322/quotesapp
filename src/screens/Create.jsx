@@ -21,6 +21,7 @@ const emotions = ["Alone", "Angry", "Anniversary", "Attitude", "Awesome", "Awkwa
 export default function Create({ navigation }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedEmotion, setSelectedEmotion] = useState(null);
+  const [selectedSong, setSelectedSong] = useState('');
   const [text, setText] = useState('');
   const [showImageEditor, setShowImageEditor] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -76,10 +77,6 @@ export default function Create({ navigation }) {
     }
   }, []); // Empty dependency array to ensure stability
 
-  const handleStoreSelection = async () => {
-    await addDoc(collection(db, 'posts'), {text, selectedEmotion});
-  }
-
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -104,11 +101,17 @@ export default function Create({ navigation }) {
     setSelectedImage(null);
   };
 
+  const handleSongSelection = (song) => {
+    setSelectedSong(song);
+    console.log('Selected Song:', selectedSong)
+    bottomSheetRef.current.close()
+  }
+
   async function saveQuote() {
     setUploading(true);
     const uploadUrl = await uploadImageAsync(selectedImage);
     await addDoc(collection(db, 'quotes'), {
-      selectedEmotion, text, uid: auth.currentUser.uid, imglink: uploadUrl
+      selectedEmotion, text, uid: auth.currentUser.uid, imglink: uploadUrl, selectedSong 
     })
     console.log("download url is:", uploadUrl)
     setUploading(false)
@@ -201,7 +204,7 @@ export default function Create({ navigation }) {
           emotionBSRef.current.expand()
         }}>
           <MaterialIcons name="emoji-emotions" size={24} color="black" />
-          <Text>Add Emotion</Text>
+          <Text>Choose Emotion</Text>
         </TouchableOpacity>
 
         {/* Song button */}
@@ -210,7 +213,7 @@ export default function Create({ navigation }) {
           bottomSheetRef.current.expand()
         }}>
           <Ionicons name="ios-musical-notes" size={24} color="black" />
-          <Text>Add Song</Text>
+          <Text>Choose Song</Text>
         </TouchableOpacity>
 
         {/* Add TextInput for entering text */}
@@ -228,21 +231,6 @@ export default function Create({ navigation }) {
           <Text style={styles.buttontext}>{uploading ? "Uploading..." : "Create"}</Text>
         </TouchableOpacity>
 
-        {selectedImage && selectedEmotion && (
-          <Button
-            title="Store Selection"
-            onPress={() => {
-              // You can store the selected image URI and emotion in your state management system or save to a database here.
-              console.log('Selected Image:', selectedImage);
-              console.log('Selected Emotion:', selectedEmotion);
-              console.log('Text:', text);
-
-              handleStoreSelection();
-
-              // Optionally, you can navigate to another screen or perform other actions after storing the selection.
-            }}
-          />
-        )}
       </ScrollView>
       <BottomSheet
         ref={emotionBSRef}
@@ -284,7 +272,7 @@ export default function Create({ navigation }) {
             queryresults.length > 0 &&
               <ScrollView style={{ width: '100%', marginTop: '3%' }} contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}>
                 {queryresults.map((val, index) => 
-                  <Song val={val} index={index} playSound={playSound} stopSound={stopSound} />
+                  <Song parentCallback={handleSongSelection} val={val} index={index} playSound={playSound} stopSound={stopSound} />
                 )}
               </ScrollView>
           }
@@ -347,6 +335,7 @@ const styles = StyleSheet.create({
   textInput: {
     backgroundColor: '#FFFFFF40',
     color: '#FFFFFF',
+    textAlign: 'center',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 5,
