@@ -15,13 +15,14 @@ import BottomSheet from '@gorhom/bottom-sheet';
 import SearchBar from '../components/global/SearchBar';
 import DeezerIcon from '../assets/icons/Deezer_Logo_RVB_White.svg'
 import Song from '../components/create/Song';
+import { EMOJI_KEY } from '@env';
 
 const emotions = ["Alone", "Angry", "Anniversary", "Attitude", "Awesome", "Awkward Moment", "Beard", "Beautiful", "Best", "Bike", "Birthday", "Break Up", "Brother", "Busy"] 
 
 export default function Create({ navigation }) {
   const [selectedImage, setSelectedImage] = useState(null);
-  const [selectedEmotion, setSelectedEmotion] = useState(null);
-  const [selectedSong, setSelectedSong] = useState('');
+  const [selectedEmotion, setSelectedEmotion] = useState({});
+  const [selectedSong, setSelectedSong] = useState({});
   const [text, setText] = useState('');
   const [showImageEditor, setShowImageEditor] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -33,20 +34,34 @@ export default function Create({ navigation }) {
   const [sound, setSound] = useState()
   const [songloading, setSongLoading] = useState(false)
 
-  const blurhash = '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
-
   useEffect(() => {
     if (queryreq.length > 0) {
       setSongLoading(true)
-      fetch(`https://api.deezer.com/search/track?q="${queryreq}"`)
+      fetch(`https://api.deezer.com/search/track?q=${queryreq}`)
         .then((res) => res.json())
         .then((retdata) => {
-          // console.log("retdata:", retdata.data)
-          setQueryResults(retdata.data.slice(9))
+          setQueryResults(retdata.data.slice(0, Math.min(9, retdata.data.length)))
           setSongLoading(false)
         })
     }
   }, [queryreq])
+
+  // fetch emoji symbol after selection
+  useEffect(() => {
+    // if (Object.keys(selectedEmotion).length !== 0) {
+    //   fetch(`https://api.api-ninjas.com/v1/emoji?name=${selectedEmotion.phrase}`, {
+    //     method: 'GET',
+    //     headers: {
+    //       'X-Api-Key': `${EMOJI_KEY}`
+    //     }
+    //   })
+    //     .then((data) => {
+    //       console.log("emoji data:", data)
+    //       setSelectedEmotion({ ...selectedEmotion, emoji: data[0]?.character})
+    //     })
+    // }
+    console
+  }, [selectedEmotion])
 
   async function playSound(link) {
     console.log('Loading Sound');
@@ -93,7 +108,7 @@ export default function Create({ navigation }) {
 
   const handleEmotionSelection = (emotion) => {
     setSelectedEmotion(emotion);
-    console.log('Selected Emotion:', selectedEmotion)
+    console.log('Selected Emotion:', emotion)
     emotionBSRef.current.close()
   };
 
@@ -110,11 +125,18 @@ export default function Create({ navigation }) {
   async function saveQuote() {
     setUploading(true);
     const uploadUrl = await uploadImageAsync(selectedImage);
+    console.log("SE:", selectedEmotion, "SS:", selectedSong)
     await addDoc(collection(db, 'quotes'), {
-      selectedEmotion, text, uid: auth.currentUser.uid, imglink: uploadUrl, selectedSong 
+      ...selectedEmotion, text, uid: auth.currentUser.uid, imglink: uploadUrl, ...selectedSong, username: auth.currentUser.displayName
     })
     console.log("download url is:", uploadUrl)
+    // reset all entries once uploaded
     setUploading(false)
+    setSelectedImage(null)
+    setSelectedEmotion({})
+    setSelectedSong({})
+    setText('')
+    setQueryReq('')
     Alert.alert("Quote uploaded!")
   }
 
@@ -179,32 +201,25 @@ export default function Create({ navigation }) {
           />
         }
 
-        {/* <View style={styles.emotionContainer}>
-          <Text style={[styles.emotionLabel, styles.textstyles]}>
-            Select Emotion:
-          </Text>
-          <View style={styles.emotionview}>
-            {emotions.map((emotion, index) => (
-              <TouchableOpacity key={emotion}
-                style={[styles.emotionButton,
-                  // selectedEmotion === emotion && styles.selectedEmotion,
-                  {backgroundColor: `hsl(${index * (360 / emotions.length)}, 50%, 60%)`}
-                ]}
-                onPress={() => handleEmotionSelection(emotion)}
-              >
-                <Text style={{textAlign: 'center'}}>{emotion}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View> */}
-
         {/* Emotion button */}
-        <TouchableOpacity style={styles.musicbutton} onPress={() => {
-          navigation.setOptions({ tabBarStyle: { display: 'none' }})
-          emotionBSRef.current.expand()
-        }}>
-          <MaterialIcons name="emoji-emotions" size={24} color="black" />
-          <Text>Choose Emotion</Text>
+        <TouchableOpacity style={[styles.musicbutton, 
+          { backgroundColor: Object.keys(selectedEmotion).length === 0 ? 'white' : selectedEmotion.color }]} 
+          onPress={() => {
+            navigation.setOptions({ tabBarStyle: { display: 'none' }})
+            emotionBSRef.current.expand()
+          }
+        }>
+          {Object.keys(selectedEmotion).length === 0 ?
+            <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
+              <MaterialIcons name="emoji-emotions" size={24} color="black" />
+              <Text>Choose Emotion</Text>
+            </View>
+          : 
+            <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
+              {/* <Text>{selectedEmotion.emoji}</Text> */}
+              <Text>{selectedEmotion.phrase}</Text>
+            </View>
+          }
         </TouchableOpacity>
 
         {/* Song button */}
@@ -212,15 +227,25 @@ export default function Create({ navigation }) {
           navigation.setOptions({ tabBarStyle: { display: 'none' }})
           bottomSheetRef.current.expand()
         }}>
-          <Ionicons name="ios-musical-notes" size={24} color="black" />
-          <Text>Choose Song</Text>
+          {Object.keys(selectedSong).length === 0 ?
+            <View style={{ flexDirection: 'row', columnGap: 8, alignItems: 'center' }}>
+              <Ionicons name="ios-musical-notes" size={24} color="black" />
+              <Text>Choose Song</Text>
+            </View>
+          :
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Image source={{ uri: selectedSong.pic }} width={50} height={50}  style={{ borderRadius: 6 }} />
+              <View style={{ marginLeft: 12, maxWidth: '70%' }}>
+                <Text style={{ color: 'black', fontFamily: GlobalStyles.fontSet.fontsemibold }}>{selectedSong.name}</Text>
+                <Text style={{ color: 'black', fontFamily: GlobalStyles.fontSet.font }}>{selectedSong.artist}</Text>
+              </View>
+            </View>
+          }
         </TouchableOpacity>
 
         {/* Add TextInput for entering text */}
         <TextInput
-          style={[styles.textInput, 
-            // {marginBottom: '50%'}
-          ]}
+          style={styles.textInput}
           value={text}
           onChangeText={setText}
           placeholder="Enter your motivational message here"
@@ -243,11 +268,8 @@ export default function Create({ navigation }) {
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', columnGap: 8 }}> 
             {emotions.map((emotion, index) => (
               <TouchableOpacity key={index}
-                style={[styles.emotionButton,
-                  // selectedEmotion === emotion && styles.selectedEmotion,
-                  {backgroundColor: `hsl(${index * (360 / emotions.length)}, 50%, 60%)`}
-                ]}
-                onPress={() => handleEmotionSelection(emotion)}
+                style={[styles.emotionButton, {backgroundColor: `hsl(${index * (360 / emotions.length)}, 50%, 60%)`}]}
+                onPress={() => handleEmotionSelection({ phrase: emotion, color: `hsl(${index * (360 / emotions.length)}, 50%, 60%)`})}
               >
                 <Text style={{textAlign: 'center'}}>{emotion}</Text>
               </TouchableOpacity>
@@ -272,7 +294,7 @@ export default function Create({ navigation }) {
             queryresults.length > 0 &&
               <ScrollView style={{ width: '100%', marginTop: '3%' }} contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}>
                 {queryresults.map((val, index) => 
-                  <Song parentCallback={handleSongSelection} val={val} index={index} playSound={playSound} stopSound={stopSound} />
+                  <Song parentCallback={handleSongSelection} val={val} key={index} playSound={playSound} stopSound={stopSound} />
                 )}
               </ScrollView>
           }
@@ -295,7 +317,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     maxHeight: 200,
-    marginBottom: 20, // Adjusted marginBottom to move the Image higher
+    marginBottom: 40, // Adjusted marginBottom to move the Image higher
   },
   image: {
     width: 200,
@@ -338,14 +360,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 5,
-    marginBottom: 10,
+    borderRadius: 8,
+    marginBottom: 20,
     width: '90%',
   },
   deselectPhotoText: {
     color: 'white',
     fontSize: 18,
-    textAlign: 'center'
+    textAlign: 'center',
   },
   clickable: {
     borderRadius: 12,

@@ -3,11 +3,11 @@ import { TouchableOpacity, Image, Text, View } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import GlobalStyles from '../../GlobalStyles';
 
-export default function Song({ parentCallback, val, index, playSound, stopSound }) {
+export default function Song({ parentCallback, val, playSound, stopSound }) {
     const [soundstate, setSoundState] = useState('play')
     return (
-        <TouchableOpacity style={{ flexDirection: 'row', width: '80%', padding: 8, alignItems: 'center' }} key={index} onPress={() => {
-            parentCallback(val.preview)
+        <TouchableOpacity style={{ flexDirection: 'row', width: '80%', padding: 8, alignItems: 'center' }} onPress={() => {
+            parentCallback({ link: val.preview, pic: val.album.cover, artist: val.artist.name, name: val.title})
         }}
         >
             <Image source={{ uri: val.album.cover }} width={50} height={50}  style={{ borderRadius: 6 }}

@@ -3,10 +3,15 @@ import { StyleSheet, Text, View, Dimensions, Image, Animated, PanResponder } fro
 import  { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 import Slide from '../components/home/Slide';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function Search() {
   const [posts, setPosts] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0)
+
+  useFocusEffect(() => {
+    console.log("search focuesd")
+  })
 
   const pan = useRef(new Animated.ValueXY()).current;
 
