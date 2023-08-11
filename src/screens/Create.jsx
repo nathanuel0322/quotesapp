@@ -60,16 +60,18 @@ export default function Create({ navigation }) {
     //       setSelectedEmotion({ ...selectedEmotion, emoji: data[0]?.character})
     //     })
     // }
-    console
+    console.log("chose:", selectedEmotion)
   }, [selectedEmotion])
 
-  async function playSound(link) {
+  async function playSound(link, onPlaybackStatusUpdate) {
     console.log('Loading Sound');
-    const { sound } = await Audio.Sound.createAsync({ uri: link });
+    const { sound, status } = await Audio.Sound.createAsync({ uri: link });
+    sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
     setSound(sound);
-
+ 
     console.log('Playing Sound');
     await sound.playAsync();
+    return status;
   }
 
   async function stopSound() {

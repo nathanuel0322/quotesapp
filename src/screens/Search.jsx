@@ -116,7 +116,7 @@ export default function Search() {
               />
             )
           }
-        }).reverse()}
+        })}
       </View>
       <View style={{ height: 60 }}></View>
     </View>
