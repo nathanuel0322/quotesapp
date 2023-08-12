@@ -22,6 +22,7 @@ export default function Search() {
   
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
+    onMoveShouldSetPanResponder: () => true, // Always return true to allow gesture
     onPanResponderMove: Animated.event([
       null, { dx: pan.x, dy: pan.y, },
     ], { useNativeDriver: false }),
@@ -64,7 +65,7 @@ export default function Search() {
 
   const rotate = pan.x.interpolate({
     inputRange: [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
-    outputRange: ['-30deg', '0deg', '10deg'],
+    outputRange: ['-10deg', '0deg', '10deg'],
     extrapolate: 'clamp',
   });
 
@@ -111,7 +112,7 @@ export default function Search() {
             )
           } else {
             return (
-              <Slide currentcard={false} key={item.id} item={item} panResponder={panResponder} rotateAndTranslate={rotateAndTranslate}
+              <Slide currentcard={false} key={item.id} item={item} panResponder={panResponder} rotateAndTranslate={rotateAndTranslate} dislikeOpacity={dislikeOpacity}
                 likeOpacity={likeOpacity} nextCardOpacity={nextCardOpacity} nextCardScale={nextCardScale} SCREEN_HEIGHT={SCREEN_HEIGHT} SCREEN_WIDTH={SCREEN_WIDTH}
               />
             )

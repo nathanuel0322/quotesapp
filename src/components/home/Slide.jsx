@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BlurView } from "expo-blur";
-import { Animated, Text, Image, View, StyleSheet } from "react-native";
+import { Animated, Text, Image, View, StyleSheet, TouchableOpacity } from "react-native";
 import { Audio } from "expo-av";
 
 import GlobalStyles from "../../GlobalStyles";
@@ -26,6 +26,10 @@ export default function Slide({ item, currentcard, panResponder, rotateAndTransl
   }
 
   useEffect(() => {
+
+  }, [])
+
+  useEffect(() => {
     return sound
       ? () => {
           console.log('Unloading Sound');
@@ -35,16 +39,18 @@ export default function Slide({ item, currentcard, panResponder, rotateAndTransl
   }, [sound]);
 
   console.log("item:", item)
+  
   return (
     currentcard ? (
+      <Animated.View {...panResponder.panHandlers} style={[rotateAndTranslate, { zIndex: 3 }]}>
         <Animated.View key={item.id}
-          {...panResponder.panHandlers}
-          style={[rotateAndTranslate, { height: SCREEN_HEIGHT * .7, width: SCREEN_WIDTH, padding: 10, position: 'absolute' }]}
+          // {...panResponder.panHandlers}
+          style={{ height: SCREEN_HEIGHT * .7, width: SCREEN_WIDTH, padding: 10, position: 'absolute' }}
         >
-            <Animated.View style={[styles.animateop, { opacity: likeOpacity, left: 40 }]}>
+            <Animated.View style={[styles.animateop, { transform: [{ rotate: '30deg' }], opacity: likeOpacity, left: 40 }]}>
                 <Text style={[styles.opinion, { borderColor: 'green', color: 'green' }]}>LIKE</Text>
             </Animated.View>
-            <Animated.View style={[styles.animateop, { opacity: dislikeOpacity, right: 40 }]}>
+            <Animated.View style={[styles.animateop, { transform: [{ rotate: '30deg' }], opacity: dislikeOpacity, right: 40 }]}>
                 <Text style={[styles.opinion, { borderColor: 'red', color: 'red' }]}>NOPE</Text>
             </Animated.View>
             <Image style={styles.imgstyles}
@@ -65,28 +71,31 @@ export default function Slide({ item, currentcard, panResponder, rotateAndTransl
             )}
             {/* middle text */}
             {imageLoaded && (
-              <View style={{ zIndex: 1000, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', }}>
+              <Animated.View style={[styles.innerview, { zIndex: 2 }]}>
                 <View style={styles.innertext}>
                   <Text style={styles.textstyles}>Emotion: {item.phrase}</Text>
                   <Text style={styles.textstyles}>{item.text}</Text>
                   <Text style={styles.textstyles}>Posted by {item.username}</Text>
                 </View>
-              </View>
+              </Animated.View>
             )}
         </Animated.View>
+      </Animated.View>
     ) : (
         <Animated.View key={item.id} style={{ opacity: nextCardOpacity, transform: [{ scale: nextCardScale }], height: SCREEN_HEIGHT * .7, 
           width: SCREEN_WIDTH, padding: 10, position: 'absolute'
         }}>
-          <Animated.View style={[styles.animateop, { left: 40 }]}>
+          {/* <Animated.View style={[styles.animateop, { transform: [{ rotate: '30deg' }], left: 40 }]}>
             <Text style={[styles.opinion, { borderColor: 'green', color: 'green' }]}>LIKE</Text>
           </Animated.View>
-          <Animated.View style={[styles.animateop, { right: 40 }]}>
+          <Animated.View style={[styles.animateop, { transform: [{ rotate: '30deg' }], right: 40 }]}>
             <Text style={[styles.opinion, { borderColor: 'red', color: 'red' }]}>NOPE</Text>
-          </Animated.View>
+          </Animated.View> */}
           <Image style={styles.imgstyles} source={{ uri: item.imglink }} onLoad={() => setImageLoaded(true)} />
           {imageLoaded && (
-            <View style={{ zIndex: 1000, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', }}>
+            <View style={[
+              // rotateAndTranslate, 
+              styles.innerview]}>
               <View style={styles.innertext}>
                 <Text style={styles.textstyles}>Emotion: {item.selectedEmotion}</Text>
                 <Text style={styles.textstyles}>{item.text}</Text>
@@ -101,7 +110,7 @@ export default function Slide({ item, currentcard, panResponder, rotateAndTransl
 
 const styles = StyleSheet.create({
     innertext: {
-      flex: 1,
+      // flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
       flexDirection: 'column',
@@ -124,11 +133,10 @@ const styles = StyleSheet.create({
       padding: 10 
     },
     animateop: {
-      transform: [{ rotate: '30deg' }],
       position: 'absolute',
       top: 50,
       zIndex: 1000,
-      opacity: 0
+      // opacity: 0
     },
     imgstyles: {
       flex: 1,
@@ -136,5 +144,15 @@ const styles = StyleSheet.create({
       width: null,
       resizeMode: 'cover',
       borderRadius: 20 
+    },
+    innerview: {
+      zIndex: 1000,
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0, 
+      justifyContent: 'center',
+      alignItems: 'center'
     }
   });
