@@ -49,7 +49,7 @@ export default function Settings({navigation}) {
                 <Text style={settingsstyles.settingspressablestext}>Account Details</Text>
             </TouchableOpacity>
         </View>
-        <View style={{position: 'absolute', top: Globals.globalDimensions.height - 100,}}>
+        {/* <View style={{position: 'absolute', top: Globals.globalDimensions.height - 100,}}>
             <View>
                 <Sepline width={Globals.globalDimensions.width} height={1} preserveAspectRatio="none" />
             </View>
@@ -57,7 +57,7 @@ export default function Settings({navigation}) {
                 <AboutIcon width={24} height={24}/>
                 <Text style={settingsstyles.settingspressablestext}>About</Text>
             </TouchableOpacity>
-        </View>
+        </View> */}
     </View>
   );
 }

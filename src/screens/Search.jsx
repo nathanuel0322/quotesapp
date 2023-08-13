@@ -4,12 +4,29 @@ import  { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 import Slide from '../components/home/Slide';
 import { Audio } from 'expo-av';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 
 export default function Search() {
   const [posts, setPosts] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0)
   const [sound, setSound] = useState()
   const [muted, setMuted] = useState(false)
+  const isFocused = useIsFocused();
+  const navigation = useNavigation();
+
+  // triggers when user leaves the search component
+  useEffect(() => {
+    async function innerstop() {
+      await stopSound()
+    }
+    if (!isFocused) {
+      console.log('Search screen is no longer focused (user left)');
+      innerstop()
+    } else {
+      // if focused again, play current song
+      playSound(posts[currentIndex].link)
+    }
+  }, [isFocused]);
 
   async function playSound(link) {
     console.log('Loading Sound');
