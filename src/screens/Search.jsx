@@ -15,6 +15,7 @@ export default function Search() {
     console.log('Loading Sound');
     const { sound } = await Audio.Sound.createAsync({ uri: link });
     await sound.setIsLoopingAsync(true);
+    await sound.setIsMutedAsync(muted)
     setSound(sound);
 
     console.log('Playing Sound');
