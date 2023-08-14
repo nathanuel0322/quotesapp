@@ -15,7 +15,7 @@ import Sepline from '../../assets/icons/sepline.svg';
 import SwitchIcon from '../../assets/icons/switchicon.svg';
 import LogoutIcon from '../../assets/icons/logouticon.svg';
 import SettingsStack from '../profile/SettingsStack';
-import ProfileMain from '../../screens/ProfileMain';
+import Profile from '../../screens/Profile';
 
 const Tab = createBottomTabNavigator();
 
@@ -69,7 +69,7 @@ export default function Tabs({ navcontainerRef }) {
         />
         <Tab.Screen
           name="Profile"
-          component={ProfileMain}
+          component={Profile}
           options={{
             headerShown: false,
             tabBarIcon: ({focused}) => (

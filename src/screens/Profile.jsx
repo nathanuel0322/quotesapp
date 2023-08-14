@@ -5,91 +5,66 @@ import GlobalStyles from '../GlobalStyles';
 import Globals from '../GlobalValues';
 import { BlurView } from 'expo-blur';
 import * as ImagePicker from 'expo-image-picker';
-import {ref, getStorage, uploadBytes, getDownloadURL, getMetadata} from "firebase/storage";
-import {manipulateAsync} from 'expo-image-manipulator';
-import Firebase, { auth, db } from '../../firebase';
+import {ref, uploadBytes, getDownloadURL, getMetadata} from "firebase/storage";
+import { auth, db, storage } from '../../firebase';
 
-import ArrowDown from '../assets/icons/arrow-down.svg'; 
 import Sepline from '../assets/icons/sepline.svg';
-import GlobalFunctions from '../GlobalFunctions';
 import { doc, getDoc } from 'firebase/firestore';
+import { updateProfile } from 'firebase/auth';
+import { Toast } from 'toastify-react-native';
 
-export default function ProfileMain({navigation}) {
-  const [following, setFollowing] = useState(false);
+export default function Profile({ navigation }) {
   const [uploading, setUploading] = useState(null);
   const [image, setImage] = useState(null); 
   const [follow, setFollow] = useState({})
+  const [picexists, setPicExists] = useState(null)
+  const pfpRef = ref(storage, `profilepictures/${auth.currentUser.uid}`)
   
   useEffect(() => {
     async function followcheck() {
       await getDoc(doc(db, 'users', auth.currentUser.uid))
         .then((val) => {
           console.log("data:", val.data())
-          setFollow({ followers: val.data().followers, following: val.data().following, likedquotes: val.data().likedquotes })
+          setFollow({ followers: val.data().followers, following: val.data().following, likedquotes: val.data().likedquotes, bio: val.data().bio })
         })
     }
     followcheck()
+    picchecker()
   }, [])
 
   useEffect(() => {
     console.log("follow val now:", follow)
   }, [follow])
 
-  const picchecker = async (folder) => {
+  async function picchecker() {
     console.log("Pic checker starts");
-    let errorcode = null;
-    await getMetadata(ref(getStorage(Firebase), `userImages/${folder}/${Globals.currentUserId}`)).catch(e => errorcode = e.code);
-    if (errorcode) {
-      console.log("Pic doesn't exist");
-      istrue = false;
-      return;
-    }
-    else {
-      if (image === null) {
-        console.log('Pic Exists');
-        istrue = true;
-        setImage(await getDownloadURL(ref(getStorage(Firebase), `userImages/headers/${Globals.currentUserId}`))); 
-        return;
-      }
+    if (auth.currentUser.photoURL) {
+      console.log('Pic Exists');
+      setPicExists(true)
+      setImage(auth.currentUser.photoURL);
     }
   }
-  
-  // UNSWITCH WHEN DONE WITH TESTING 
 
-  // picchecker('headers');
-
-
-  const pickImage = async (folder) => {
-    let pickerResult = await ImagePicker.launchImageLibraryAsync({quality: 0});
-    console.log({ pickerResult });
-    handleImagePicked(pickerResult, folder);
-  }
-
-  const handleImagePicked = async (pickerResult, folder) => {
+  async function pickImage() {
+    let pickerResult = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+    });
     try {
       setUploading(true);
-
-      if (!pickerResult.cancelled) {
-        const width = pickerResult.width;
-        const height = pickerResult.height;
-        const manipResult = await manipulateAsync(
-          pickerResult.uri, 
-          [{crop: {width: width, height: height / 5, originX: 0, originY: height / 2}}], 
-          {compress: 0}
-        );
-        console.log(manipResult);
-        const uploadUrl = await uploadImageAsync(manipResult.uri, folder);
-        setImage(uploadUrl);
-      }
+      const uploadUrl = await uploadImageAsync(pickerResult.assets[0].uri);
+      setImage(uploadUrl);
     } catch (e) {
       console.log(e);
-      alert("Upload failed, sorry :(");
+      Toast.error("Upload failed, try again")
     } finally {
+      setPicExists(true)
       setUploading(false);
+      Toast.success('Successfully uploaded!')
     }
   }
 
-  const uploadImageAsync = async (uri, folder) => {
+  const uploadImageAsync = async (uri) => {
     const blob = await new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.onload = () => {
@@ -104,22 +79,16 @@ export default function ProfileMain({navigation}) {
       xhr.send(null);
     });
   
-    const fileRef = ref(getStorage(Firebase), `userImages/${folder}/${Globals.currentUserId}`);
-    const result = await uploadBytes(fileRef, blob);
+    await uploadBytes(pfpRef, blob)
     
     blob.close();
-  
-    return await getDownloadURL(fileRef);
-  }
+    const profilepicurl = await getDownloadURL(pfpRef)
 
-  useEffect(() => {
-    console.log('useffect ran');
-    const unsubscribe = navigation.addListener('focus', () => {
-      GlobalFunctions.showNavBar(navigation)
-    });
-  
-    return unsubscribe;
-  }, [navigation]);
+    // assign photo to profile for easy access later on
+    await updateProfile(auth.currentUser, { photoURL: profilepicurl })
+
+    return profilepicurl;
+  }
 
   return (
     <View style={{width: Globals.globalDimensions.width,flexDirection: 'column',flex: 1,}}>
@@ -138,25 +107,39 @@ export default function ProfileMain({navigation}) {
         <View style={[profilestyles.fpfp, {top: Globals.globalDimensions.height < 900 && Globals.globalDimensions.height * .0407608696,}]}>
           <View style={[profilestyles.fpfpP, { top: -10, width: Globals.globalDimensions.width * .136, }]}>
             <Text style={profilestyles.followtext}>
-              {follow.followers.length}
+              {follow.followers?.length}
             </Text>
             <Text style={{ color: GlobalStyles.colorSet.secondary6, fontSize: 13, fontFamily: GlobalStyles.fontSet.font, }}>
               Followers
             </Text>
           </View>
-          <View style={[profilestyles.fpfpP, { paddingHorizontal: 75, width: Globals.globalDimensions.width * .136, borderRadius: 36, 
+          <Pressable style={[profilestyles.fpfpP, { paddingHorizontal: 75, width: Globals.globalDimensions.width * .136, borderRadius: 36, 
             overflow: 'hidden'
-          }]}>
-            <Image
-              source={require('../assets/images/blank-profile-picture-973460_640.png')}
-              style={{ width: Globals.globalDimensions.width * .266666667, height: Globals.globalDimensions.width * .266666667,
-                borderRadius: 16,
-              }}
-            />
-          </View>
+          }]}
+            onPress={() => pickImage()}
+          >
+            {picexists ?
+              <Image
+                source={{ uri: image }}
+                style={{ width: Globals.globalDimensions.width * .266666667, height: Globals.globalDimensions.width * .266666667,
+                  borderRadius: 16,
+                }}
+              />
+            :
+              uploading ?
+                <ActivityIndicator color="#fff" animating size="large" />
+              :
+                <Image
+                  source={require('../assets/images/blank-profile-picture-973460_640.png')}
+                  style={{ width: Globals.globalDimensions.width * .266666667, height: Globals.globalDimensions.width * .266666667,
+                    borderRadius: 16,
+                  }}
+                />
+            }
+          </Pressable>
           <View style={[profilestyles.fpfpP, { top: -10, width: Globals.globalDimensions.width * .154666667, }]} >
             <Text style={profilestyles.followtext}>
-              {follow.following.length}
+              {follow.following?.length}
             </Text>
             <Text style={[profilestyles.grays, {fontFamily: GlobalStyles.fontSet.font,fontSize: 13,}]}>
               Following
@@ -171,22 +154,25 @@ export default function ProfileMain({navigation}) {
             {auth.currentUser.displayName}
           </Text>
         </View>
-        <View 
-          style={[
-            profilestyles.profilebio, 
-            {
-              width: '74%',
-              justifyContent: 'center',
-              alignContent: 'center',
-              marginTop: 12,
-            }
-          ]}
-        >
-          <Text style={{color: 'white', fontFamily: GlobalStyles.fontSet.font, textAlign: 'center', fontSize: 15,}}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam donec sem tristique a.
-          </Text>
-        </View>
-        <View style={[profilestyles.profilebuttons, {flex: 1, justifyContent: 'center',}]}>
+        {follow.bio &&
+          <View 
+            style={[
+              profilestyles.profilebio, 
+              {
+                width: '74%',
+                justifyContent: 'center',
+                alignContent: 'center',
+                marginTop: 12,
+              }
+            ]}
+          >
+            <Text style={{color: 'white', fontFamily: GlobalStyles.fontSet.font, textAlign: 'center', fontSize: 15,}}>
+              {follow.bio}
+            </Text>
+          </View>
+        }
+        {/* commented out follow button since this is current user's screen */}
+        {/* <View style={[profilestyles.profilebuttons, {flex: 1, justifyContent: 'center',}]}>
           <Pressable
             onPress={() => [setFollowing(!following), console.log('following is ' + !following)]}
             style={[
@@ -227,15 +213,9 @@ export default function ProfileMain({navigation}) {
               <></>
             }
           </Pressable>
-        </View>
+        </View> */}
       </View>
-      <View
-        style={{
-          marginTop: Globals.globalDimensions.height > 900 ? Globals.globalDimensions.height * .48488121 : Globals.globalDimensions.height * .62,
-          alignItems: 'center',
-          marginBottom: 19,
-        }}
-      >
+      <View style={{ marginTop: '70%', alignItems: 'center', marginBottom: 19, }}>
         <Sepline width={Globals.globalDimensions.width} height={1} preserveAspectRatio="none" />
       </View>
       <View style={{marginTop: 50,}}>

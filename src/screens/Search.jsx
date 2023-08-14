@@ -91,7 +91,7 @@ export default function Search() {
         Animated.spring(pan, {
           toValue: { x: SCREEN_WIDTH + 100, y: gestureState.dy },
           useNativeDriver: true,
-          duration: 300
+          // duration: 300
         }).start(async() => {
           // Card was liked
           console.log("Card liked");
@@ -103,7 +103,7 @@ export default function Search() {
         Animated.spring(pan, {
           toValue: { x: -SCREEN_WIDTH - 100, y: gestureState.dy },
           useNativeDriver: true,
-          duration: 300
+          // duration: 300
         }).start(async () => {
           // Card was disliked
           console.log("Card disliked");
