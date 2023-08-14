@@ -1,12 +1,11 @@
 import React, { useContext, useRef, useMemo, useCallback, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View, Pressable, Text, ScrollView } from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
+import { MaterialCommunityIcons, Feather, Ionicons } from '@expo/vector-icons';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { AuthContext } from './AuthProvider';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import Brush from '../../screens/Brush';
 import Search from '../../screens/Search';
 import Create from '../../screens/Create';
 import GlobalStyles from '../../GlobalStyles';
@@ -16,6 +15,7 @@ import Sepline from '../../assets/icons/sepline.svg';
 import SwitchIcon from '../../assets/icons/switchicon.svg';
 import LogoutIcon from '../../assets/icons/logouticon.svg';
 import SettingsStack from '../profile/SettingsStack';
+import ProfileMain from '../../screens/ProfileMain';
 
 const Tab = createBottomTabNavigator();
 
@@ -44,19 +44,6 @@ export default function Tabs({ navcontainerRef }) {
         screenOptions={{ tabBarShowLabel: false, tabBarStyle: tabstyle, }}
       >
         <Tab.Screen
-          name="Brush"
-          component={Brush}
-          options={{
-            backgroundColor: GlobalStyles.colorSet.primary1,
-            headerShown: false,
-            tabBarIcon: ({focused}) => (
-              <View>
-                <MaterialCommunityIcons name="brush-variant" size={24} color={focused ? GlobalStyles.colorSet.blue6 : "white"} />
-              </View>
-            ),
-          }}
-        />
-        <Tab.Screen
           name="Menu"
           component={Search}
           options={{
@@ -76,6 +63,18 @@ export default function Tabs({ navcontainerRef }) {
             tabBarIcon: ({focused}) => (
               <View>
                 <MaterialCommunityIcons name="plus" size={24} color={focused ? GlobalStyles.colorSet.blue6 : "white"} />
+              </View>
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Profile"
+          component={ProfileMain}
+          options={{
+            headerShown: false,
+            tabBarIcon: ({focused}) => (
+              <View>
+                <Ionicons name="person" size={24} color={focused ? GlobalStyles.colorSet.blue6 : "white"} />
               </View>
             ),
           }}

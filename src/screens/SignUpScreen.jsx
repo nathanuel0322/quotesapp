@@ -17,7 +17,6 @@ const SignupScreen = ({navigation}) => {
   return(
     <View style={styles.container}>
       <Text style={styles.text}>Create an Account</Text>
-
       <FormInput
         labelValue={email}
         onChangeText={(userEmail) => setEmail(userEmail)}
@@ -27,7 +26,6 @@ const SignupScreen = ({navigation}) => {
         autoCapitalize="none"
         autoCorrect={false}
       />
-      
       <FormInput
         labelValue={username}
         onChangeText={setUsername}
@@ -37,7 +35,6 @@ const SignupScreen = ({navigation}) => {
         autoCapitalize="none"
         autoCorrect={false}
       />
-
       <FormInput
         labelValue={password}
         onChangeText={setPassword}
@@ -45,7 +42,6 @@ const SignupScreen = ({navigation}) => {
         iconType="lock"
         secureTextEntry={true}
       />
-      
       <FormInput
         labelValue={confirmPassword}
         onChangeText={setConfirmPassword}
@@ -53,7 +49,6 @@ const SignupScreen = ({navigation}) => {
         iconType="lock"
         secureTextEntry={true}
       />
-
       <FormButton
         buttonTitle="Sign Up"
         onPress={() => {
@@ -64,7 +59,6 @@ const SignupScreen = ({navigation}) => {
           }
         }}
       />
-
       <TouchableOpacity
         style={styles.navButton}
         onPress={() => navigation.navigate('Login')}>
@@ -100,17 +94,5 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: GlobalStyles.colorSet.accent1,
     fontFamily: 'Gilroy',
-  },
-  textPrivate: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginVertical: 35,
-    justifyContent: 'center',
-  },
-  color_textPrivate: {
-    fontSize: 13,
-    fontWeight: '400',
-    fontFamily: 'Gilroy',
-    color: 'grey',
   },
 });

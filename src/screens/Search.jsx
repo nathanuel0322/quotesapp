@@ -24,7 +24,7 @@ export default function Search() {
       innerstop()
     } else {
       // if focused again, play current song
-      playSound(posts[currentIndex].link)
+      playSound(posts[currentIndex]?.link)
     }
   }, [isFocused]);
 
