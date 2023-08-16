@@ -1,12 +1,12 @@
 import React, {useContext, useState, useMemo, useRef, useCallback, useEffect} from 'react';
 import {Text, Image, View, TouchableOpacity, StyleSheet, Pressable, ActivityIndicator} from 'react-native';
-import { ProfileButtonGroup } from '../components/profile/ProfileButtonGroup';
 import GlobalStyles from '../GlobalStyles';
 import Globals from '../GlobalValues';
 import { BlurView } from 'expo-blur';
 import * as ImagePicker from 'expo-image-picker';
 import {ref, uploadBytes, getDownloadURL, getMetadata} from "firebase/storage";
 import { auth, db, storage } from '../../firebase';
+import ProfileButtons from '../components/profile/ProfileButtons';
 
 import Sepline from '../assets/icons/sepline.svg';
 import { doc, getDoc } from 'firebase/firestore';
@@ -219,7 +219,7 @@ export default function Profile({ navigation }) {
         <Sepline width={Globals.globalDimensions.width} height={1} preserveAspectRatio="none" />
       </View>
       <View style={{marginTop: 50,}}>
-        <ProfileButtonGroup />
+        <ProfileButtons />
       </View>
     </View>
   );

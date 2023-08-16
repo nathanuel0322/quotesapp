@@ -7,15 +7,13 @@ import SettingsStackHeader from '../components/settings/SettingsStackHeader';
 
 import EstherIcon from '../assets/images/EstherIcon.svg'; 
 import RezaIcon from '../assets/images/RezaIcon.svg'; 
-import MaryIcon from '../assets/images/MaryIcon.svg'; 
-import Sepline from '../assets/icons/sepline.svg';
-import AboutIcon from '../assets/icons/info-transparent.svg';
+import MaryIcon from '../assets/images/MaryIcon.svg';
 
 let mutedarr = [
-                    [<EstherIcon />, 'Esther Howard', 'Posts and Story Muted'], 
-                    [<RezaIcon />, 'Reza Mohammadi', 'Posts muted'], 
-                    [<MaryIcon />, 'Mary', 'Story muted'], 
-                ];
+  [<EstherIcon />, 'Esther Howard', 'Posts and Story Muted'], 
+  [<RezaIcon />, 'Reza Mohammadi', 'Posts muted'], 
+  [<MaryIcon />, 'Mary', 'Story muted'], 
+];
 
 export default function MutedAccounts({navigation}) {
   return (
@@ -45,15 +43,6 @@ export default function MutedAccounts({navigation}) {
                 </View>
             ))}
         </ScrollView>
-        <View style={{position: 'absolute', top: Globals.globalDimensions.height - 100,}}>
-            <View>
-                <Sepline width={Globals.globalDimensions.width} height={1} preserveAspectRatio="none" />
-            </View>
-            <TouchableOpacity style={[blockedstyles.aboutbutton, {paddingVertical: 35,}]}>
-                <AboutIcon width={24} height={24}/>
-                <Text style={blockedstyles.abouttext}>About</Text>
-            </TouchableOpacity>
-        </View>
     </View>
   );
 }

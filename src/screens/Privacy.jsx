@@ -6,7 +6,6 @@ import SettingsStackHeader from '../components/settings/SettingsStackHeader';
 
 import PrivateIcon from '../assets/icons/privateicon.svg'; 
 import Sepline from '../assets/icons/sepline.svg';
-import AboutIcon from '../assets/icons/info-transparent.svg';
 import MutedIcon from '../assets/icons/mutedicon.svg';
 import BlockedIcon from '../assets/icons/blockedicon.svg';
 
@@ -69,15 +68,6 @@ export default function Privacy({navigation}) {
             <TouchableOpacity style={settingsstyles.settingspressables} onPress={() => navigation.navigate("Blocked Accounts")}>
                 <BlockedIcon />
                 <Text style={settingsstyles.settingspressablestext}>Blocked Accounts</Text>
-            </TouchableOpacity>
-        </View>
-        <View style={{position: 'absolute', top: Globals.globalDimensions.height - 100,}}>
-            <View>
-                <Sepline width={Globals.globalDimensions.width} height={1} preserveAspectRatio="none" />
-            </View>
-            <TouchableOpacity style={[settingsstyles.settingspressables, {paddingVertical: 35,}]}>
-                <AboutIcon width={24} height={24}/>
-                <Text style={settingsstyles.settingspressablestext}>About</Text>
             </TouchableOpacity>
         </View>
     </View>

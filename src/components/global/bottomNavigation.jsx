@@ -14,7 +14,7 @@ import Globals from '../../GlobalValues';
 import Sepline from '../../assets/icons/sepline.svg';
 import SwitchIcon from '../../assets/icons/switchicon.svg';
 import LogoutIcon from '../../assets/icons/logouticon.svg';
-import SettingsStack from '../profile/SettingsStack';
+import SettingsStack from '../settings/SettingsStack';
 import Profile from '../../screens/Profile';
 
 const Tab = createBottomTabNavigator();

@@ -1,4 +1,4 @@
-import { React, useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, Dimensions, Image, Animated, PanResponder } from 'react-native';
 import  { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
@@ -132,7 +132,7 @@ export default function Search() {
       if (sound) {
         stopSound()
       }
-      playSound(posts[currentIndex].link)
+      playSound(posts[currentIndex]?.link)
     }
   }, [posts, currentIndex])
 

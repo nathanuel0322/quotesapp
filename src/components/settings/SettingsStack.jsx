@@ -1,15 +1,11 @@
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import Settings from '../../screens/Settings';
-import Languages from '../../screens/Languages';
-import Country from '../../screens/Country';
 import SocialMedia from '../../screens/SocialMedia';
 import Privacy from '../../screens/Privacy';
 import AccountDetails from '../../screens/AccountDetails';
-import About from '../../screens/About';
 import BlockedAccounts from '../../screens/BlockedAccounts';
 import MutedAccounts from '../../screens/MutedAccounts';
-import Wallet from '../../screens/Wallet';
 
 const Stack = createStackNavigator();
 
@@ -19,16 +15,6 @@ export default function SettingsStack({navigation}) {
             <Stack.Screen 
                 name='Settings'
                 component={Settings}
-                options={{headerShown: false}} 
-            />
-            <Stack.Screen 
-                name='Languages'
-                component={Languages}
-                options={{headerShown: false}} 
-            />
-            <Stack.Screen 
-                name='Country'
-                component={Country}
                 options={{headerShown: false}} 
             />
             <Stack.Screen 

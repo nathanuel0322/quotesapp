@@ -1,7 +1,6 @@
 import React from 'react';
 import {Text, View, StyleSheet, TouchableOpacity} from 'react-native';
 import GlobalStyles from '../GlobalStyles';
-import Globals from '../GlobalValues';
 import SettingsStackHeader from '../components/settings/SettingsStackHeader';
 
 import WalletIcon from '../assets/icons/walleticon.svg'; 
@@ -10,8 +9,6 @@ import CountryIcon from '../assets/icons/countryicon.svg';
 import SocialMediaIcon from '../assets/icons/socialmediaicon.svg';
 import PrivacyIcon from '../assets/icons/privacyicon.svg';
 import AccountIcon from '../assets/icons/accountdetailicon.svg';
-import Sepline from '../assets/icons/sepline.svg';
-import AboutIcon from '../assets/icons/info-transparent.svg';
 import ArrowLeftIcon from '../assets/icons/arrowlefticon.svg';
 
 export default function Settings({navigation}) {

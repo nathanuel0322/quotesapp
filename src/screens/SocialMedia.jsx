@@ -11,8 +11,6 @@ import CountryIcon from '../assets/icons/countryicon.svg';
 import SocialMediaIcon from '../assets/icons/socialmediaicon.svg';
 import PrivacyIcon from '../assets/icons/privacyicon.svg';
 import AccountIcon from '../assets/icons/accountdetailicon.svg';
-import Sepline from '../assets/icons/sepline.svg';
-import AboutIcon from '../assets/icons/info-transparent.svg';
 
 export default function SocialMedia({navigation}) {
 
@@ -92,15 +90,6 @@ export default function SocialMedia({navigation}) {
             <TouchableOpacity style={settingsstyles.settingspressables}>
                 <AccountIcon />
                 <Text style={settingsstyles.settingspressablestext}>Account Details</Text>
-            </TouchableOpacity>
-        </View>
-        <View style={{paddingTop: 120}}>
-            <View>
-                <Sepline width={Globals.globalDimensions.width} height={1} preserveAspectRatio="none" />
-            </View>
-            <TouchableOpacity style={[settingsstyles.settingspressables, {paddingVertical: 35,}]}>
-                <AboutIcon width={24} height={24}/>
-                <Text style={settingsstyles.settingspressablestext}>About</Text>
             </TouchableOpacity>
         </View>
     </View>
