@@ -11,10 +11,6 @@ import GlobalStyles from '../../GlobalStyles';
 export default function ProfileButtons() {
   const [page, setPage] = useState();
 
-  const handlePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
   return(
     <View>
       <View style={styles.container}>

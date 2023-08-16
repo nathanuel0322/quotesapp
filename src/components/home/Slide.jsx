@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { BlurView } from "expo-blur";
 import { Animated, Text, Image, View, StyleSheet, TouchableOpacity } from "react-native";
-import { Audio } from "expo-av";
-import { Ionicons, MaterialIcons  } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 
 import GlobalStyles from "../../GlobalStyles";
 
@@ -26,13 +25,11 @@ export default function Slide({ item1, item2, muted, setMuted, currentcard, panR
             />
             {/* top song details */}
             {imageLoaded && item1.name && item1.artist && (
-              // <View style={{ zIndex: 1000, position: 'absolute', left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', }}>
-                  <BlurView style={styles.musicview}>
-                    <Text style={[styles.textstyles, { color: 'black', fontFamily: GlobalStyles.fontSet.fontbold, marginVertical: 0 }]}>
-                      🎵 {item1.name} • {item1.artist}
-                    </Text>
-                  </BlurView>
-              // </View>
+              <BlurView style={styles.musicview}>
+                <Text style={[styles.textstyles, { color: 'black', fontFamily: GlobalStyles.fontSet.fontbold, marginVertical: 0 }]}>
+                  🎵 {item1.name} • {item1.artist}
+                </Text>
+              </BlurView>
             )}
             {/* middle text */}
             {imageLoaded && (

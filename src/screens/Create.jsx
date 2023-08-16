@@ -15,7 +15,6 @@ import BottomSheet from '@gorhom/bottom-sheet';
 import SearchBar from '../components/global/SearchBar';
 import DeezerIcon from '../assets/icons/Deezer_Logo_RVB_White.svg'
 import Song from '../components/create/Song';
-import { EMOJI_KEY } from '@env';
 
 const emotions = ["Alone", "Angry", "Anniversary", "Attitude", "Awesome", "Awkward Moment", "Beard", "Beautiful", "Best", "Bike", "Birthday", "Break Up", "Brother", "Busy"] 
 

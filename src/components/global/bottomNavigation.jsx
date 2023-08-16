@@ -6,7 +6,7 @@ import BottomSheet from '@gorhom/bottom-sheet';
 import { AuthContext } from './AuthProvider';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import Search from '../../screens/Search';
+import Home from '../../screens/Home';
 import Create from '../../screens/Create';
 import GlobalStyles from '../../GlobalStyles';
 import Globals from '../../GlobalValues';
@@ -44,8 +44,8 @@ export default function Tabs({ navcontainerRef }) {
         screenOptions={{ tabBarShowLabel: false, tabBarStyle: tabstyle, }}
       >
         <Tab.Screen
-          name="Menu"
-          component={Search}
+          name="Home"
+          component={Home}
           options={{
             headerShown: false,
             tabBarIcon: ({focused}) => (
