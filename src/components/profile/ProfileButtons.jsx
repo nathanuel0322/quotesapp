@@ -9,9 +9,9 @@ import ContentTransparent from '../../assets/images/content-transparent.svg';
 import GlobalStyles from '../../GlobalStyles';
 
 export default function ProfileButtons() {
-  const [page, setPage] = useState();
+  const [page, setPage] = useState('Posts');
 
-  return(
+  return (
     <View>
       <View style={styles.container}>
         <TouchableOpacity style={styles.button} onPress={() => setPage('Posts')}>
@@ -61,7 +61,6 @@ const styles = StyleSheet.create({
     marginTop: -55,
     alignItems: 'center',
     justifyContent: 'center',
-    // marginHorizontal: 20,
     width: '50%'
   },
 

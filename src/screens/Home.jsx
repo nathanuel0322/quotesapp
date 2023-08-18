@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, Dimensions, Image, Animated, PanResponder } from 'react-native';
-import  { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../firebase';
+import  { collection, getDocs, doc, runTransaction, updateDoc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../../firebase';
 import Slide from '../components/home/Slide';
 import { Audio } from 'expo-av';
-import { useIsFocused, useNavigation } from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Toast } from 'toastify-react-native';
 
@@ -14,7 +14,24 @@ export default function Home() {
   const [sound, setSound] = useState()
   const [muted, setMuted] = useState(false)
   const isFocused = useIsFocused();
-  const navigation = useNavigation();
+
+  async function updateFSLiked() {
+    // batch write to Firestore
+    const newLikedQuotes = JSON.parse(await AsyncStorage.getItem("liked"))
+    const userRef = doc(db, 'users', auth.currentUser.uid)
+
+    const userDoc = await getDoc(userRef)
+    const storedLiked = userDoc.data().likedquotes;
+    
+    const sameLikes = JSON.stringify(newLikedQuotes) === JSON.stringify(storedLiked)
+
+    if (!sameLikes) {
+      await updateDoc(userRef, { likedquotes: newLikedQuotes })
+      console.log("New quotes in firebase is:", newquotes)
+    } else {
+      console.log("Liked quotes are the same, no update needed");
+    }
+  }
 
   // triggers when user leaves the search component
   useEffect(() => {
@@ -24,6 +41,7 @@ export default function Home() {
     if (!isFocused) {
       console.log('Search screen is no longer focused (user left)');
       innerstop()
+      updateFSLiked()
     } else {
       // if focused again, play current song
       playSound(posts[currentIndex]?.link)
