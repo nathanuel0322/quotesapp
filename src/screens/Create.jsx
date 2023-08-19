@@ -16,8 +16,6 @@ import SearchBar from '../components/global/SearchBar';
 import DeezerIcon from '../assets/icons/Deezer_Logo_RVB_White.svg'
 import Song from '../components/create/Song';
 
-const emotions = ["Alone", "Angry", "Anniversary", "Attitude", "Awesome", "Awkward Moment", "Beard", "Beautiful", "Best", "Bike", "Birthday", "Break Up", "Brother", "Busy"] 
-
 export default function Create({ navigation }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedEmotion, setSelectedEmotion] = useState({});
@@ -267,10 +265,10 @@ export default function Create({ navigation }) {
       >
         <ScrollView contentContainerStyle={{ alignItems: 'center', justifyContent: 'flex-start', paddingTop: 8 }}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', columnGap: 8 }}> 
-            {emotions.map((emotion, index) => (
+            {GlobalValues.emotions.map((emotion, index) => (
               <TouchableOpacity key={index}
-                style={[styles.emotionButton, {backgroundColor: `hsl(${index * (360 / emotions.length)}, 50%, 60%)`}]}
-                onPress={() => handleEmotionSelection({ phrase: emotion, color: `hsl(${index * (360 / emotions.length)}, 50%, 60%)`})}
+                style={[styles.emotionButton, {backgroundColor: `hsl(${index * (360 / GlobalValues.emotions.length)}, 50%, 60%)`}]}
+                onPress={() => handleEmotionSelection({ phrase: emotion, color: `hsl(${index * (360 / GlobalValues.emotions.length)}, 50%, 60%)`})}
               >
                 <Text style={{textAlign: 'center'}}>{emotion}</Text>
               </TouchableOpacity>
