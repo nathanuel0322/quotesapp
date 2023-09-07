@@ -27,7 +27,7 @@ export default function Liked() {
             const postsarr = await Promise.all(querySnapshot.docs.map(async(doc) => {
                 // console.log(doc.id, " => ", doc.data())
                 // if one of the post's they've liked is present, add to array
-                if (likedposts.includes(doc.id)) {
+                if (likedposts?.includes(doc.id)) {
                     return doc.data();
                 }
                 return null
@@ -90,14 +90,14 @@ export default function Liked() {
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        backgroundColor: 'white'
+        backgroundColor: 'transparent'
     },
     items: {
         width: '100%'
     },
     imgstyles: {
-        width: 50,
-        height: 70,
+        width: 150,
+        height: 190,
         borderRadius: 20 
     },
     innertext: {

@@ -43,7 +43,7 @@ export const AuthProvider = ({children}) => {
               await updateProfile(userCredential.user, { displayName: username })
                 .then(async() => {
                   await AsyncStorage.setItem('displayname', username)
-                  await setDoc(doc(db, 'users', auth.currentUser.uid), {
+                  await setDoc(doc(db, 'users', username), {
                     following: [],
                     followers: [],
                     likedquotes: []

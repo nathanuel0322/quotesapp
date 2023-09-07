@@ -1,17 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {Text, View, StyleSheet, TouchableOpacity} from 'react-native';
 import GlobalStyles from '../GlobalStyles';
 import SettingsStackHeader from '../components/settings/SettingsStackHeader';
+import { Switch } from 'react-native-switch';
 
-import WalletIcon from '../assets/icons/walleticon.svg'; 
 import LanguageIcon from '../assets/icons/languageicon.svg';
 import CountryIcon from '../assets/icons/countryicon.svg';
 import SocialMediaIcon from '../assets/icons/socialmediaicon.svg';
 import PrivacyIcon from '../assets/icons/privacyicon.svg';
 import AccountIcon from '../assets/icons/accountdetailicon.svg';
 import ArrowLeftIcon from '../assets/icons/arrowlefticon.svg';
+import { MaterialIcons, Feather } from '@expo/vector-icons';
 
 export default function Settings({navigation}) {
+  const [isEnabled, setIsEnabled] = useState(true);
+  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+
   return (
     <View>
         <TouchableOpacity style={settingsstyles.backbutton} onPress={() => navigation.goBack()}>
@@ -19,12 +23,29 @@ export default function Settings({navigation}) {
         </TouchableOpacity>
         <SettingsStackHeader navigation={navigation} currentPage={'Settings'} navtoPage={'ProfileMain'} hideRightButton={true} />
         <View style={{left: 0}}>
-            <TouchableOpacity style={[settingsstyles.settingspressables, {paddingTop: 24 ,paddingBottom: 32,}]} 
-                onPress={() => [navigation.navigate('Wallet'), console.log('Wallet pressed')]}
-            >
-                <WalletIcon />
-                <Text style={settingsstyles.settingspressablestext}>Wallet</Text>
-            </TouchableOpacity>
+          <View style={settingsstyles.settingspressables}>
+            <MaterialIcons name="wb-twighlight" size={24} color="white" />
+            <Text style={[settingsstyles.settingspressablestext, {marginRight: '40%'}]}>Appearance</Text>
+            <Switch
+              value={isEnabled}
+              onValueChange={toggleSwitch}
+              disabled={false}
+              activeText={'On'}
+              inActiveText={'Off'}
+              circleSize={40}
+              barHeight={40}
+              circleBorderWidth={2}
+              backgroundActive={'gray'}
+              backgroundInactive={'white'}
+              circleActiveColor={'#000000'}
+              circleInActiveColor={'white'}
+              renderInsideCircle={() => isEnabled ? <Feather name="moon" size={27} color="white" /> : <Feather name="sun" size={27} color="orange" />} // custom component to render inside the Switch circle (Text, Image, etc.)
+              changeValueImmediately={true} // if rendering inside circle, change state immediately or wait for animation to complete
+              renderActiveText={false}
+              renderInActiveText={false}
+              switchWidthMultiplier={2} // multiplied by the `circleSize` prop to calculate total width of the Switch
+            />
+          </View>
             <TouchableOpacity style={settingsstyles.settingspressables} onPress={() => navigation.navigate("Languages")}>
                 <LanguageIcon />
                 <Text style={settingsstyles.settingspressablestext}>Language</Text>

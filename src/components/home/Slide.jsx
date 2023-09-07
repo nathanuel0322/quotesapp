@@ -4,11 +4,14 @@ import { Animated, Text, Image, View, StyleSheet, TouchableOpacity } from "react
 import { MaterialIcons } from '@expo/vector-icons';
 
 import GlobalStyles from "../../GlobalStyles";
+import { useNavigation } from "@react-navigation/native";
 
 export default function Slide({ item1, item2, muted, setMuted, currentcard, panResponder, rotateAndTranslate, likeOpacity, dislikeOpacity, nextCardOpacity, nextCardScale,
-    SCREEN_HEIGHT, SCREEN_WIDTH
+    SCREEN_HEIGHT, SCREEN_WIDTH, navigation
 }) {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const navigate = useNavigation();
+  
 
   return (
     currentcard ? (
@@ -34,11 +37,15 @@ export default function Slide({ item1, item2, muted, setMuted, currentcard, panR
             {/* middle text */}
             {imageLoaded && (
               <Animated.View style={[styles.innerview, { zIndex: 2 }]}>
-                <View style={styles.innertext}>
+                <TouchableOpacity style={styles.innertext} onPress={() => {
+                  console.log("Center Pressed");
+                  console.log("user:", item1.username)
+                  navigation.navigate("OtherProfile", { username: item1.username })
+                }}>
                   <Text style={styles.textstyles}>Emotion: {item1.phrase}</Text>
                   <Text style={styles.textstyles}>{item1.text}</Text>
                   <Text style={styles.textstyles}>Posted by {item1.username}</Text>
-                </View>
+                </TouchableOpacity>
               </Animated.View>
             )}
             <TouchableOpacity onPress={() => setMuted(!muted)} style={styles.soundview}>

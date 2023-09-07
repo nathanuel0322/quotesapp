@@ -3,29 +3,31 @@ import {Text, Image, View, TouchableOpacity, StyleSheet, Pressable, ActivityIndi
 import GlobalStyles from '../GlobalStyles';
 import Globals from '../GlobalValues';
 import { BlurView } from 'expo-blur';
-import * as ImagePicker from 'expo-image-picker';
 import {ref, uploadBytes, getDownloadURL, getMetadata} from "firebase/storage";
 import { auth, db, storage } from '../../firebase';
 import ProfileButtons from '../components/profile/ProfileButtons';
 
 import Sepline from '../assets/icons/sepline.svg';
 import { doc, getDoc } from 'firebase/firestore';
-import { updateProfile } from 'firebase/auth';
-import { Toast } from 'toastify-react-native';
 
-export default function Profile({ navigation }) {
-  const [uploading, setUploading] = useState(null);
+export default function OtherProfile({ navigation, route }) {
   const [image, setImage] = useState(null); 
   const [follow, setFollow] = useState({})
   const [picexists, setPicExists] = useState(null)
-  const pfpRef = ref(storage, `profilepictures/${auth.currentUser.displayName}`)
+  const [username, setUsername] = useState(route.params.username)
+  const [following, setFollowing] = useState()
+  console.log("username is:", route.params.username)
+  const pfpRef = ref(storage, `profilepictures/${username}`)
   
   useEffect(() => {
     async function followcheck() {
-      await getDoc(doc(db, 'users', auth.currentUser.displayName))
+      await getDoc(doc(db, 'users', username))
         .then((val) => {
           console.log("data:", val.data())
           setFollow({ followers: val.data().followers, following: val.data().following, likedquotes: val.data().likedquotes, bio: val.data().bio })
+        })
+        .catch((e) => {
+            console.log("e:", e)
         })
     }
     followcheck()
@@ -38,62 +40,12 @@ export default function Profile({ navigation }) {
 
   async function picchecker() {
     console.log("Pic checker starts");
-    await getDownloadURL(pfpRef)
-      .then(async (link) => {
-        if (link) {
-          console.log('Pic Exists');
-          setPicExists(true)
-          setImage(link);
-        }
-      })
-      .catch((e) => {
-        console.log("e:", e)
-      })
-  }
-
-  async function pickImage() {
-    let pickerResult = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
-    });
-    try {
-      setUploading(true);
-      const uploadUrl = await uploadImageAsync(pickerResult.assets[0].uri);
-      setImage(uploadUrl);
-    } catch (e) {
-      console.log(e);
-      Toast.error("Upload failed, try again")
-    } finally {
-      setPicExists(true)
-      setUploading(false);
-      Toast.success('Successfully uploaded!')
-    }
-  }
-
-  const uploadImageAsync = async (uri) => {
-    const blob = await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.onload = () => {
-        resolve(xhr.response);
-      };
-      xhr.onerror = function (e) {
-        console.log(e);
-        reject(new TypeError("Network request failed"));
-      };
-      xhr.responseType = "blob";
-      xhr.open("GET", uri, true);
-      xhr.send(null);
-    });
-  
-    await uploadBytes(pfpRef, blob)
-    
-    blob.close();
     const profilepicurl = await getDownloadURL(pfpRef)
-
-    // assign photo to profile for easy access later on
-    await updateProfile(auth.currentUser, { photoURL: profilepicurl })
-
-    return profilepicurl;
+    if (profilepicurl) {
+      console.log('Pic Exists');
+      setPicExists(true)
+      setImage(profilepicurl);
+    }
   }
 
   return (
@@ -103,7 +55,7 @@ export default function Profile({ navigation }) {
           <BlurView intensity={13}> 
             <View style={{ fontSize: 14, backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: 15, padding: 11, height: 45, zIndex: 999, }}>
               <Text style={{ color: 'white', fontFamily: GlobalStyles.fontSet.fontsemibold, top: 3,}}>
-                {auth.currentUser.displayName}
+                {username}
               </Text> 
             </View>
           </BlurView>
@@ -132,14 +84,11 @@ export default function Profile({ navigation }) {
                 }}
               />
             :
-              uploading ?
-                <ActivityIndicator color="#fff" animating size="large" />
-              :
                 <Image
-                  source={require('../assets/images/blank-profile-picture-973460_640.png')}
-                  style={{ width: Globals.globalDimensions.width * .266666667, height: Globals.globalDimensions.width * .266666667,
+                    source={require('../assets/images/blank-profile-picture-973460_640.png')}
+                    style={{ width: Globals.globalDimensions.width * .266666667, height: Globals.globalDimensions.width * .266666667,
                     borderRadius: 16,
-                  }}
+                    }}
                 />
             }
           </Pressable>
@@ -157,7 +106,7 @@ export default function Profile({ navigation }) {
             Globals.globalDimensions.height * .0172786177,}}
         >
           <Text style={{  color: 'white',   fontSize: 20,  fontFamily: GlobalStyles.fontSet.fontsemibold,}}>
-            {auth.currentUser.displayName}
+            {username}
           </Text>
         </View>
         {follow.bio &&
@@ -177,8 +126,38 @@ export default function Profile({ navigation }) {
             </Text>
           </View>
         }
+        <View style={[profilestyles.profilebuttons, {flex: 1, justifyContent: 'center',}]}>
+          <Pressable
+            onPress={() => [setFollowing(!following), console.log('following is ' + !following)]}
+            style={[
+              profilestyles.buttons, 
+              {
+                flexDirection: 'row',
+                backgroundColor: following ? 'transparent' : GlobalStyles.colorSet.primary4,
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginRight: 4,
+                width: Globals.globalDimensions.width * .434666667,
+                height: Globals.globalDimensions.height > 900 ?  Globals.globalDimensions.height * .0492610837 : Globals.globalDimensions.height * .06,
+                borderWidth: 2,
+                borderColor: following ? GlobalStyles.colorSet.neutral5 : GlobalStyles.colorSet.primary4, 
+              }
+            ]}
+          >
+            <Text
+              style={{
+                color: 'white',
+                textAlign: 'center',
+                fontFamily: GlobalStyles.fontSet.fontbold,
+                fontSize: 15,
+              }}
+            >
+              {following ? 'Following' : 'Follow'}
+            </Text>
+          </Pressable>
+        </View>
       </View>
-      <View style={{ marginTop: '70%', alignItems: 'center', marginBottom: 19, }}>
+      <View style={{ marginTop: '85%', alignItems: 'center', marginBottom: 19, }}>
         <Sepline width={Globals.globalDimensions.width} height={1} preserveAspectRatio="none" />
       </View>
       <View style={{marginTop: 50,}}>
@@ -206,7 +185,6 @@ const profilestyles = StyleSheet.create({
     width: '100%',
     height: 'auto',
   },
-  
   fpfp: {
     width: '100%',
     flex: 1,
@@ -220,7 +198,6 @@ const profilestyles = StyleSheet.create({
     textAlign: 'center',
     width: '.701333333333333%',
   },
-
   profilebuttons: {
     display: 'flex',
     flexDirection: 'row',
@@ -229,17 +206,10 @@ const profilestyles = StyleSheet.create({
     width: 100,
     marginTop: 28,
   },
-
   buttons: {
     borderRadius: 15,
     color: '#FFFFFF',
     fontFamily: "Gilroy",
-  },
-
-  followbutton: {
-    backgroundColor: GlobalStyles.colorSet.primary4,
-    left: '21px',
-    borderColor: GlobalStyles.colorSet.primary4,
   },
   followtext: {
     color: 'white',

@@ -33,11 +33,6 @@ export default function SettingsStack({navigation}) {
                 options={{headerShown: false}} 
             />
             <Stack.Screen 
-                name='About'
-                component={About}
-                options={{headerShown: false}} 
-            />
-            <Stack.Screen 
                 name='Blocked Accounts'
                 component={BlockedAccounts}
                 options={{headerShown: false}} 
@@ -45,11 +40,6 @@ export default function SettingsStack({navigation}) {
             <Stack.Screen 
                 name='Muted Accounts'
                 component={MutedAccounts}
-                options={{headerShown: false}} 
-            />
-            <Stack.Screen 
-                name='Wallet'
-                component={Wallet}
                 options={{headerShown: false}} 
             />
         </Stack.Navigator>

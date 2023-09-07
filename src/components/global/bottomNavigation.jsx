@@ -16,6 +16,7 @@ import SwitchIcon from '../../assets/icons/switchicon.svg';
 import LogoutIcon from '../../assets/icons/logouticon.svg';
 import SettingsStack from '../settings/SettingsStack';
 import Profile from '../../screens/Profile';
+import HomeStack from '../home/HomeStack';
 
 const Tab = createBottomTabNavigator();
 
@@ -44,8 +45,8 @@ export default function Tabs({ navcontainerRef }) {
         screenOptions={{ tabBarShowLabel: false, tabBarStyle: tabstyle, }}
       >
         <Tab.Screen
-          name="Home"
-          component={Home}
+          name="HomeStack"
+          component={HomeStack}
           options={{
             headerShown: false,
             tabBarIcon: ({focused}) => (

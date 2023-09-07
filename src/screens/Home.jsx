@@ -8,7 +8,7 @@ import { useIsFocused } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Toast } from 'toastify-react-native';
 
-export default function Home() {
+export default function Home({ navigation }) {
   const [posts, setPosts] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0)
   const [sound, setSound] = useState()
@@ -18,7 +18,7 @@ export default function Home() {
   async function updateFSLiked() {
     // batch write to Firestore
     const newLikedQuotes = JSON.parse(await AsyncStorage.getItem("liked"))
-    const userRef = doc(db, 'users', auth.currentUser.uid)
+    const userRef = doc(db, 'users', auth.currentUser.displayName)
 
     const userDoc = await getDoc(userRef)
     const storedLiked = userDoc.data().likedquotes;
@@ -51,12 +51,12 @@ export default function Home() {
   async function playSound(link) {
     console.log('Loading Sound');
     const { sound } = await Audio.Sound.createAsync({ uri: link });
-    await sound.setIsLoopingAsync(true);
-    await sound.setIsMutedAsync(muted)
+    await sound?.setIsLoopingAsync(true);
+    await sound?.setIsMutedAsync(muted)
     setSound(sound);
 
     console.log('Playing Sound');
-    await sound.playAsync();
+    await sound?.playAsync();
   }
 
   async function stopSound() {
@@ -220,13 +220,13 @@ export default function Home() {
             return null
           } else if (i === currentIndex) {
             return (
-              <Slide currentcard={true} key={item.id} item1={item} item2={i !== posts.length - 1 && posts[i+1]} panResponder={panResponder} rotateAndTranslate={rotateAndTranslate} likeOpacity={likeOpacity}
+              <Slide navigation={navigation} currentcard={true} key={item.id} item1={item} item2={i !== posts.length - 1 && posts[i+1]} panResponder={panResponder} rotateAndTranslate={rotateAndTranslate} likeOpacity={likeOpacity}
                 dislikeOpacity={dislikeOpacity} SCREEN_HEIGHT={SCREEN_HEIGHT} SCREEN_WIDTH={SCREEN_WIDTH} muted={muted} setMuted={setMuted}
               />
             )
           } else {
             return (
-              <Slide currentcard={false} key={item.id} item1={item} item2={i !== posts.length - 1 && posts[i+1]} panResponder={panResponder} rotateAndTranslate={rotateAndTranslate} dislikeOpacity={dislikeOpacity}
+              <Slide navigation={navigation} currentcard={false} key={item.id} item1={item} item2={i !== posts.length - 1 && posts[i+1]} panResponder={panResponder} rotateAndTranslate={rotateAndTranslate} dislikeOpacity={dislikeOpacity}
                 likeOpacity={likeOpacity} nextCardOpacity={nextCardOpacity} nextCardScale={nextCardScale} SCREEN_HEIGHT={SCREEN_HEIGHT} SCREEN_WIDTH={SCREEN_WIDTH}
               />
             )
