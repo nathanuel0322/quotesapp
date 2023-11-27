@@ -213,7 +213,8 @@ export default function Home({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={{ height: 60 }}></View>
+      <Image source={require('../assets/icons/ThatPush.jpg')} style={{ position: 'absolute', top: 10, left: 25, width: 75, height: 75 }} />
+      <View style={{ height: 80 }}></View>
       <View style={{ flex: 1, marginTop: '5%' }}>
         {posts.map((item, i) => {
           if (i < currentIndex) {
