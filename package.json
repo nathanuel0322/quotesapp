@@ -52,7 +52,8 @@
     "react-native-svg-transformer": "^1.0.0"
   },
   "overrides": {
-    "tar": "^6.2.1"
+    "tar": "^6.2.1",
+    "braces": "^3.0.3"
   },
   "private": true
 }
