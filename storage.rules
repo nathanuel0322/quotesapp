@@ -1,0 +1,26 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isImage(maxMb) {
+      return request.resource.size < maxMb * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    match /profilepictures/{uid} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid && isImage(5);
+      allow delete: if request.auth != null && request.auth.uid == uid;
+    }
+
+    match /quotepics/{file} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && isImage(10)
+        && request.resource.metadata.owner == request.auth.uid;
+      // images uploaded before owner metadata existed can't be deleted from the app
+      allow delete: if request.auth != null && resource.metadata.owner == request.auth.uid;
+    }
+  }
+}

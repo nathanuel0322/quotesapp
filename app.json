@@ -1,44 +1,53 @@
 {
   "expo": {
-    "name": "quotesapp",
+    "name": "That Push",
     "slug": "quotesapp",
+    "scheme": "thatpush",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "updates": {
-      "fallbackToCacheTimeout": 0
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.thatpush.app"
     },
     "android": {
+      "package": "com.thatpush.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#0A0B14"
       }
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "packagerOpts": {
-      "sourceExts": ["cjs"]
-    },
     "plugins": [
       [
         "expo-image-picker",
         {
-          "photosPermission": "The app accesses your photos to let you share them."
+          "photosPermission": "That Push uses your photos so you can add them to your quotes.",
+          "cameraPermission": "That Push uses your camera so you can take photos for your quotes."
         }
-      ]
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#0A0B14"
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false
+        }
+      ],
+      "expo-status-bar",
+      "expo-font",
+      "expo-image",
+      "expo-asset"
     ]
   }
 }

@@ -1,0 +1,91 @@
+rules_version = '2';
+
+// Deploy with: firebase deploy --only firestore:rules,storage
+// Data model is documented in src/services/users.js and src/services/quotes.js.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isUser(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    function usernameDoc(name) {
+      return getAfter(/databases/$(database)/documents/usernames/$(name));
+    }
+
+    // usernames/{name} -> { uid }: reservation docs that keep usernames unique
+    match /usernames/{name} {
+      allow get: if true;           // availability check on the sign-up screen
+      allow list: if signedIn();    // people search (prefix query)
+      allow create: if isUser(request.resource.data.uid)
+        && request.resource.data.keys().hasOnly(['uid'])
+        && name.matches('^[a-z0-9_.]{3,20}$');
+      allow delete: if isUser(resource.data.uid);
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn();
+
+      // the matching usernames doc must be created in the same transaction
+      allow create: if isUser(uid)
+        && request.resource.data.uid == uid
+        && usernameDoc(request.resource.data.username).data.uid == uid;
+
+      allow update: if ownerUpdate(uid) || followerToggle() || (signedIn() && changedKeys().size() == 0);
+
+      allow delete: if isUser(uid);
+
+      function ownerUpdate(uid) {
+        return isUser(uid)
+          && !changedKeys().hasAny(['uid', 'createdAt'])
+          && (!changedKeys().hasAny(['username'])
+              || usernameDoc(request.resource.data.username).data.uid == uid);
+      }
+
+      // anyone may add or remove *themselves* from someone's followers list
+      function followerToggle() {
+        let before = resource.data.get('followers', []).toSet();
+        let after = request.resource.data.get('followers', []).toSet();
+        let me = [request.auth.uid].toSet();
+        return signedIn()
+          && changedKeys().hasOnly(['followers'])
+          && ((after.difference(before) == me && before.difference(after).size() == 0)
+              || (before.difference(after) == me && after.difference(before).size() == 0));
+      }
+    }
+
+    match /quotes/{id} {
+      allow read: if signedIn();
+
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 300
+        && request.resource.data.likes == 0;
+
+      // authors can edit their post (but not its owner or like count);
+      // everyone else can only move the like count by one
+      allow update: if (signedIn()
+          && resource.data.uid == request.auth.uid
+          && !changedKeys().hasAny(['uid', 'likes']))
+        || (signedIn()
+          && changedKeys().hasOnly(['likes'])
+          && (request.resource.data.likes - resource.data.get('likes', 0)) in [1, -1]);
+
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    match /reports/{id} {
+      allow create: if signedIn() && request.resource.data.reporterUid == request.auth.uid;
+    }
+  }
+}
