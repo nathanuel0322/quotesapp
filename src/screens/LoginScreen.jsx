@@ -6,9 +6,19 @@ import { AuthContext } from '../components/global/AuthProvider';
 import GlobalStyles from '../GlobalStyles';
 import { sendPasswordResetEmail  } from 'firebase/auth';
 import { auth } from '../../firebase';
-
+import { useTheme } from '../components/global/ThemeContext';
 
 const LoginScreen = ({navigation}) => {
+  const { isDarkMode } = useTheme()
+
+  const containerStyle = {
+    backgroundColor: isDarkMode ? 'black' : 'white',
+  };
+
+  const textStyle = {
+    color: isDarkMode ? 'white' : 'black',
+  };
+
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
   const alertshown = false;

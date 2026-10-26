@@ -4,6 +4,7 @@ import { useFonts } from 'expo-font';
 
 import Providers from './src/components/global/index.js';
 import Globals from './src/GlobalValues';
+import { ThemeProvider } from './src/components/global/ThemeContext.jsx';
 
 export default function App() {
   Globals.globalDimensions = useWindowDimensions();
@@ -25,7 +26,9 @@ export default function App() {
   }
 
   return (
-    <Providers />
+    <ThemeProvider>
+      <Providers />
+    </ThemeProvider>
   )
 }
 
