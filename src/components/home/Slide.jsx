@@ -4,32 +4,33 @@ import { Animated, Text, Image, View, StyleSheet, TouchableOpacity } from "react
 import { MaterialIcons } from '@expo/vector-icons';
 
 import GlobalStyles from "../../GlobalStyles";
-import { useNavigation } from "@react-navigation/native";
+import { useTheme } from "../global/ThemeContext";
 
-export default function Slide({ item1, item2, muted, setMuted, currentcard, panResponder, rotateAndTranslate, likeOpacity, dislikeOpacity, nextCardOpacity, nextCardScale,
+export default function Slide({ item1, muted, setMuted, currentcard, panResponder, rotateAndTranslate, likeOpacity, dislikeOpacity, nextCardOpacity, nextCardScale,
     SCREEN_HEIGHT, SCREEN_WIDTH, navigation
 }) {
   const [imageLoaded, setImageLoaded] = useState(false);
-  const navigate = useNavigation();
-  
+  const { colors } = useTheme();
+  const textStyle = [styles.textstyles, { color: colors.text }];
+  const panelStyle = [styles.innertext, { backgroundColor: colors.overlay }];
 
   return (
     currentcard ? (
       <Animated.View {...panResponder.panHandlers} style={[rotateAndTranslate, { zIndex: 3 }]}>
         <Animated.View key={item1.id} style={{ height: SCREEN_HEIGHT * .7, width: SCREEN_WIDTH, padding: 10, position: 'absolute' }}>
             <Animated.View style={[styles.animateop, { transform: [{ rotate: '30deg' }], opacity: likeOpacity, left: 40 }]}>
-                <Text style={[styles.opinion, { borderColor: 'green', color: 'green' }]}>LIKE</Text>
+                <Text style={[styles.opinion, { borderColor: colors.success, color: colors.success }]}>LIKE</Text>
             </Animated.View>
             <Animated.View style={[styles.animateop, { transform: [{ rotate: '30deg' }], opacity: dislikeOpacity, right: 40 }]}>
-                <Text style={[styles.opinion, { borderColor: 'red', color: 'red' }]}>NOPE</Text>
+                <Text style={[styles.opinion, { borderColor: colors.danger, color: colors.danger }]}>NOPE</Text>
             </Animated.View>
             <Image style={styles.imgstyles}
                 source={{ uri: item1.imglink }} onLoad={() => setImageLoaded(true)}
             />
             {/* top song details */}
             {imageLoaded && item1.name && item1.artist && (
-              <BlurView style={styles.musicview}>
-                <Text style={[styles.textstyles, { color: 'black', fontFamily: GlobalStyles.fontSet.fontbold, marginVertical: 0 }]}>
+              <BlurView tint={colors.blurTint} style={styles.musicview}>
+                <Text style={[styles.textstyles, { color: colors.text, fontFamily: GlobalStyles.fontSet.fontbold, marginVertical: 0 }]}>
                   🎵 {item1.name} • {item1.artist}
                 </Text>
               </BlurView>
@@ -37,39 +38,35 @@ export default function Slide({ item1, item2, muted, setMuted, currentcard, panR
             {/* middle text */}
             {imageLoaded && (
               <Animated.View style={[styles.innerview, { zIndex: 2 }]}>
-                <TouchableOpacity style={styles.innertext} onPress={() => {
-                  console.log("Center Pressed");
-                  console.log("user:", item1.username)
+                <TouchableOpacity style={panelStyle} onPress={() => {
                   navigation.navigate("OtherProfile", { username: item1.username })
                 }}>
-                  <Text style={styles.textstyles}>Emotion: {item1.phrase}</Text>
-                  <Text style={styles.textstyles}>{item1.text}</Text>
-                  <Text style={styles.textstyles}>Posted by {item1.username}</Text>
+                  <Text style={textStyle}>Emotion: {item1.phrase}</Text>
+                  <Text style={textStyle}>{item1.text}</Text>
+                  <Text style={textStyle}>Posted by {item1.username}</Text>
                 </TouchableOpacity>
               </Animated.View>
             )}
-            <TouchableOpacity onPress={() => setMuted(!muted)} style={styles.soundview}>
-              <BlurView style={{ padding: 6 }}>
-                {muted ?
-                  <MaterialIcons name="volume-off" size={26} color="black" />
-                :
-                  <MaterialIcons name="volume-up" size={26} color="black" />
-                }
+            <TouchableOpacity onPress={() => setMuted(!muted)} style={styles.soundview}
+              accessibilityRole="button" accessibilityLabel={muted ? "Unmute" : "Mute"}
+            >
+              <BlurView tint={colors.blurTint} style={{ padding: 6 }}>
+                <MaterialIcons name={muted ? "volume-off" : "volume-up"} size={26} color={colors.text} />
               </BlurView>
             </TouchableOpacity>
         </Animated.View>
       </Animated.View>
     ) : (
-        <Animated.View key={item2.id} style={{ opacity: nextCardOpacity, transform: [{ scale: nextCardScale }], height: SCREEN_HEIGHT * .7, 
+        <Animated.View key={item1.id} style={{ opacity: nextCardOpacity, transform: [{ scale: nextCardScale }], height: SCREEN_HEIGHT * .7, 
           width: SCREEN_WIDTH, padding: 10, position: 'absolute'
         }}>
-          <Image style={styles.imgstyles} source={{ uri: item2.imglink }} onLoad={() => setImageLoaded(true)} />
+          <Image style={styles.imgstyles} source={{ uri: item1.imglink }} onLoad={() => setImageLoaded(true)} />
           {imageLoaded && (
             <View style={styles.innerview}>
-              <View style={styles.innertext}>
-                <Text style={styles.textstyles}>Emotion: {item2.selectedEmotion}</Text>
-                <Text style={styles.textstyles}>{item2.text}</Text>
-                <Text style={styles.textstyles}>Posted by {item2.username}</Text>
+              <View style={panelStyle}>
+                <Text style={textStyle}>Emotion: {item1.phrase}</Text>
+                <Text style={textStyle}>{item1.text}</Text>
+                <Text style={textStyle}>Posted by {item1.username}</Text>
               </View>
             </View>
           )}
@@ -83,7 +80,6 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       justifyContent: 'center',
       flexDirection: 'column',
-      backgroundColor: '#0A0B14',
       maxHeight: '30%',
       padding: 8,
       borderRadius: 16
@@ -91,7 +87,6 @@ const styles = StyleSheet.create({
     textstyles: {
       textAlign: 'center',
       marginVertical: '2%',
-      color: 'white',
       fontSize: 20,
       fontWeight: 'bold',
     },

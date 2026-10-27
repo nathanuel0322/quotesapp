@@ -9,6 +9,7 @@ import { auth, db, storage } from '../../firebase';
 import ProfileButtons from '../components/profile/ProfileButtons';
 
 import Sepline from '../assets/icons/sepline.svg';
+import { useTheme } from '../components/global/ThemeContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { updateProfile } from 'firebase/auth';
 import { Toast } from 'toastify-react-native';
@@ -19,12 +20,13 @@ export default function Profile({ navigation }) {
   const [follow, setFollow] = useState({})
   const [picexists, setPicExists] = useState(null)
   const pfpRef = ref(storage, `profilepictures/${auth.currentUser.displayName}`)
+  const { colors } = useTheme();
   
   useEffect(() => {
     async function followcheck() {
       await getDoc(doc(db, 'users', auth.currentUser.displayName))
         .then((val) => {
-          console.log("data:", val.data())
+          if (!val.exists()) return
           setFollow({ followers: val.data().followers, following: val.data().following, likedquotes: val.data().likedquotes, bio: val.data().bio })
         })
     }
@@ -32,16 +34,10 @@ export default function Profile({ navigation }) {
     picchecker()
   }, [])
 
-  useEffect(() => {
-    console.log("follow val now:", follow)
-  }, [follow])
-
   async function picchecker() {
-    console.log("Pic checker starts");
     await getDownloadURL(pfpRef)
       .then(async (link) => {
         if (link) {
-          console.log('Pic Exists');
           setPicExists(true)
           setImage(link);
         }
@@ -56,17 +52,20 @@ export default function Profile({ navigation }) {
       allowsEditing: true,
       aspect: [1, 1],
     });
+    if (pickerResult.canceled) {
+      return
+    }
     try {
       setUploading(true);
       const uploadUrl = await uploadImageAsync(pickerResult.assets[0].uri);
       setImage(uploadUrl);
+      setPicExists(true)
+      Toast.success('Successfully uploaded!')
     } catch (e) {
       console.log(e);
       Toast.error("Upload failed, try again")
     } finally {
-      setPicExists(true)
       setUploading(false);
-      Toast.success('Successfully uploaded!')
     }
   }
 
@@ -97,12 +96,12 @@ export default function Profile({ navigation }) {
   }
 
   return (
-    <View style={{width: Globals.globalDimensions.width,flexDirection: 'column',flex: 1,}}>
+    <View style={{width: Globals.globalDimensions.width,flexDirection: 'column',flex: 1, backgroundColor: colors.background}}>
       <View style={{top: 22, flexDirection: 'row', position: 'absolute', }}>
         <View style={{ overflow: 'hidden', height: 45, borderRadius: 15, zIndex: 999,left: 15,}}>
-          <BlurView intensity={13}> 
-            <View style={{ fontSize: 14, backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: 15, padding: 11, height: 45, zIndex: 999, }}>
-              <Text style={{ color: 'white', fontFamily: GlobalStyles.fontSet.fontsemibold, top: 3,}}>
+          <BlurView intensity={13} tint={colors.blurTint}> 
+            <View style={{ backgroundColor: colors.glass, borderRadius: 15, padding: 11, height: 45, zIndex: 999, }}>
+              <Text style={{ color: colors.text, fontFamily: GlobalStyles.fontSet.fontsemibold, top: 3,}}>
                 {auth.currentUser.displayName}
               </Text> 
             </View>
@@ -112,10 +111,10 @@ export default function Profile({ navigation }) {
       <View style={[profilestyles.firstsection,{marginTop: Globals.globalDimensions.height * .075,}]}>
         <View style={[profilestyles.fpfp, {top: Globals.globalDimensions.height < 900 && Globals.globalDimensions.height * .0407608696,}]}>
           <View style={[profilestyles.fpfpP, { top: -10, width: Globals.globalDimensions.width * .136, }]}>
-            <Text style={profilestyles.followtext}>
+            <Text style={[profilestyles.followtext, { color: colors.text }]}>
               {follow.followers?.length}
             </Text>
-            <Text style={{ color: GlobalStyles.colorSet.secondary6, fontSize: 13, fontFamily: GlobalStyles.fontSet.font, }}>
+            <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: GlobalStyles.fontSet.font, }}>
               Followers
             </Text>
           </View>
@@ -124,7 +123,13 @@ export default function Profile({ navigation }) {
           }]}
             onPress={() => pickImage()}
           >
-            {picexists ?
+            {uploading ?
+              <View style={{ width: Globals.globalDimensions.width * .266666667, height: Globals.globalDimensions.width * .266666667,
+                alignItems: 'center', justifyContent: 'center' }}
+              >
+                <ActivityIndicator color={colors.text} animating size="large" />
+              </View>
+            : picexists ?
               <Image
                 source={{ uri: image }}
                 style={{ width: Globals.globalDimensions.width * .266666667, height: Globals.globalDimensions.width * .266666667,
@@ -132,9 +137,6 @@ export default function Profile({ navigation }) {
                 }}
               />
             :
-              uploading ?
-                <ActivityIndicator color="#fff" animating size="large" />
-              :
                 <Image
                   source={require('../assets/images/blank-profile-picture-973460_640.png')}
                   style={{ width: Globals.globalDimensions.width * .266666667, height: Globals.globalDimensions.width * .266666667,
@@ -144,10 +146,10 @@ export default function Profile({ navigation }) {
             }
           </Pressable>
           <View style={[profilestyles.fpfpP, { top: -10, width: Globals.globalDimensions.width * .154666667, }]} >
-            <Text style={profilestyles.followtext}>
+            <Text style={[profilestyles.followtext, { color: colors.text }]}>
               {follow.following?.length}
             </Text>
-            <Text style={[profilestyles.grays, {fontFamily: GlobalStyles.fontSet.font,fontSize: 13,}]}>
+            <Text style={[profilestyles.grays, {color: colors.textSecondary, fontFamily: GlobalStyles.fontSet.font,fontSize: 13,}]}>
               Following
             </Text>
           </View>
@@ -156,11 +158,11 @@ export default function Profile({ navigation }) {
           style={{marginTop: Globals.globalDimensions.height < 900 ? Globals.globalDimensions.height * .06 : 
             Globals.globalDimensions.height * .0172786177,}}
         >
-          <Text style={{  color: 'white',   fontSize: 20,  fontFamily: GlobalStyles.fontSet.fontsemibold,}}>
+          <Text style={{  color: colors.text,   fontSize: 20,  fontFamily: GlobalStyles.fontSet.fontsemibold,}}>
             {auth.currentUser.displayName}
           </Text>
         </View>
-        {follow.bio &&
+        {!!follow.bio &&
           <View 
             style={[
               profilestyles.profilebio, 
@@ -172,14 +174,14 @@ export default function Profile({ navigation }) {
               }
             ]}
           >
-            <Text style={{color: 'white', fontFamily: GlobalStyles.fontSet.font, textAlign: 'center', fontSize: 15,}}>
+            <Text style={{color: colors.text, fontFamily: GlobalStyles.fontSet.font, textAlign: 'center', fontSize: 15,}}>
               {follow.bio}
             </Text>
           </View>
         }
       </View>
       <View style={{ marginTop: '70%', alignItems: 'center', marginBottom: 19, }}>
-        <Sepline width={Globals.globalDimensions.width} height={1} preserveAspectRatio="none" />
+        <Sepline width={Globals.globalDimensions.width} height={1} preserveAspectRatio="none" color={colors.text} />
       </View>
       <View style={{marginTop: 50,}}>
         <ProfileButtons />
@@ -195,7 +197,6 @@ const profilestyles = StyleSheet.create({
     marginTop: 'auto',
   },
   grays: {
-    color: GlobalStyles.colorSet.secondary6,
     fontSize: 12,
   },
   firstsection: {
@@ -216,7 +217,6 @@ const profilestyles = StyleSheet.create({
     left: 3,
   },
   profilebio: {
-    color: GlobalStyles.colorSet.secondary6,
     textAlign: 'center',
     width: '.701333333333333%',
   },
@@ -232,17 +232,10 @@ const profilestyles = StyleSheet.create({
 
   buttons: {
     borderRadius: 15,
-    color: '#FFFFFF',
     fontFamily: "Gilroy",
   },
 
-  followbutton: {
-    backgroundColor: GlobalStyles.colorSet.primary4,
-    left: '21px',
-    borderColor: GlobalStyles.colorSet.primary4,
-  },
   followtext: {
-    color: 'white',
     fontFamily: GlobalStyles.fontSet.fontsemibold,
     fontSize: 20,
     paddingBottom: 4

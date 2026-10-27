@@ -7,29 +7,30 @@ import { Audio } from 'expo-av';
 import { useIsFocused } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Toast } from 'toastify-react-native';
+import { useTheme } from '../components/global/ThemeContext';
+import GlobalStyles from '../GlobalStyles';
 
 export default function Home({ navigation }) {
   const [posts, setPosts] = useState([]);
+  const [loadingPosts, setLoadingPosts] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0)
   const [sound, setSound] = useState()
   const [muted, setMuted] = useState(false)
   const isFocused = useIsFocused();
+  const { colors } = useTheme();
 
   async function updateFSLiked() {
     // batch write to Firestore
-    const newLikedQuotes = JSON.parse(await AsyncStorage.getItem("liked"))
+    const newLikedQuotes = JSON.parse(await AsyncStorage.getItem("liked")) ?? []
     const userRef = doc(db, 'users', auth.currentUser.displayName)
 
     const userDoc = await getDoc(userRef)
-    const storedLiked = userDoc.data().likedquotes;
+    const storedLiked = userDoc.data()?.likedquotes;
     
     const sameLikes = JSON.stringify(newLikedQuotes) === JSON.stringify(storedLiked)
 
     if (!sameLikes) {
       await updateDoc(userRef, { likedquotes: newLikedQuotes })
-      console.log("New quotes in firebase is:", newquotes)
-    } else {
-      console.log("Liked quotes are the same, no update needed");
     }
   }
 
@@ -39,55 +40,58 @@ export default function Home({ navigation }) {
       await stopSound()
     }
     if (!isFocused) {
-      console.log('Search screen is no longer focused (user left)');
       innerstop()
-      updateFSLiked()
-    } else {
+      updateFSLiked().catch((e) => console.log("Syncing likes failed:", e))
+    } else if (posts[currentIndex]?.link) {
       // if focused again, play current song
-      playSound(posts[currentIndex]?.link)
+      playSound(posts[currentIndex].link)
     }
   }, [isFocused]);
 
   async function playSound(link) {
-    console.log('Loading Sound');
-    const { sound } = await Audio.Sound.createAsync({ uri: link });
-    await sound?.setIsLoopingAsync(true);
-    await sound?.setIsMutedAsync(muted)
-    setSound(sound);
-
-    console.log('Playing Sound');
-    await sound?.playAsync();
+    if (!link) {
+      return
+    }
+    try {
+      const { sound } = await Audio.Sound.createAsync({ uri: link });
+      await sound.setIsLoopingAsync(true);
+      await sound.setIsMutedAsync(muted)
+      setSound(sound);
+      await sound.playAsync();
+    } catch (e) {
+      console.log("Playing song failed:", e)
+    }
   }
 
   async function stopSound() {
-    await sound.stopAsync()
+    await sound?.stopAsync().catch(() => {})
   }
 
   useEffect(() => {
     return sound
       ? () => {
-          console.log('Unloading Sound');
           sound.unloadAsync();
         }
       : undefined;
   }, [sound]);
 
   useEffect(() => {
-    async function mutefunc() {
-      await sound.setIsMutedAsync(muted)
-    }
-    mutefunc(muted)
+    sound?.setIsMutedAsync(muted).catch(() => {})
   }, [muted])
 
   useEffect(() => {
     const getPosts = async () => {
       const likedarr = JSON.parse(await AsyncStorage.getItem('liked'))
       const data = await getDocs(collection(db, 'quotes'));
-      console.log("likedarr:", likedarr, "liv:", !likedarr?.includes('Odso1EXlgjg2zb7osGlK'))
       setPosts(data.docs.map((doc) => ({ ...doc.data(), id: doc.id})).filter((val) => !likedarr?.includes(val.id)));
     };
 
-    getPosts();
+    getPosts()
+      .catch((e) => {
+        console.log("Loading posts failed:", e)
+        Toast.error("Couldn't load posts!")
+      })
+      .finally(() => setLoadingPosts(false));
   }, []);
 
   useEffect(() => {
@@ -108,16 +112,7 @@ export default function Home({ navigation }) {
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponder: () => true, // Always return true to allow gesture
-    onPanResponderGrant: () => {
-      // Card entering the screen, you can add your logic here
-      console.log("Card entered the screen");
-    },
     onPanResponderMove: async(evt, gestureState) => {
-      console.log("Pan X:", gestureState.dx);
-      console.log("Pan Y:", gestureState.dy);
-      console.log("as:", JSON.parse(await AsyncStorage.getItem("liked")))
-      // await AsyncStorage.clear()
-
       if (Math.abs(gestureState.dx) >= 315) {
         // setCurrentIndex(currentIndex + 1);
         // pause current song
@@ -136,7 +131,6 @@ export default function Home({ navigation }) {
           // duration: 300
         }).start(async() => {
           // Card was liked
-          console.log("Card liked");
           await likesaver(posts[currentIndex].id)
           setCurrentIndex(currentIndex + 1);
           pan.setValue({ x: 0, y: 0 });
@@ -149,7 +143,6 @@ export default function Home({ navigation }) {
           // duration: 300
         }).start(async () => {
           // Card was disliked
-          console.log("Card disliked");
           setCurrentIndex(currentIndex + 1);
           pan.setValue({ x: 0, y: 0 });
           await stopSound()
@@ -197,10 +190,8 @@ export default function Home({ navigation }) {
   async function likesaver(cardid) {
     try {
       const jsonValue = JSON.parse(await AsyncStorage.getItem('liked'));
-      console.log("json val in likesaver:", jsonValue)
       if (jsonValue != null) {
         let finalarr = [...jsonValue, cardid]
-        console.log('finalarr:', finalarr)
         await AsyncStorage.setItem('liked', JSON.stringify(finalarr))
       } else {
         await AsyncStorage.setItem('liked', JSON.stringify([cardid]))
@@ -212,27 +203,28 @@ export default function Home({ navigation }) {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Image source={require('../assets/icons/ThatPush.jpg')} style={{ position: 'absolute', top: 10, left: 25, width: 75, height: 75 }} />
       <View style={{ height: 80 }}></View>
       <View style={{ flex: 1, marginTop: '5%' }}>
-        {posts.map((item, i) => {
-          if (i < currentIndex) {
-            return null
-          } else if (i === currentIndex) {
-            return (
-              <Slide navigation={navigation} currentcard={true} key={item.id} item1={item} item2={i !== posts.length - 1 && posts[i+1]} panResponder={panResponder} rotateAndTranslate={rotateAndTranslate} likeOpacity={likeOpacity}
-                dislikeOpacity={dislikeOpacity} SCREEN_HEIGHT={SCREEN_HEIGHT} SCREEN_WIDTH={SCREEN_WIDTH} muted={muted} setMuted={setMuted}
-              />
-            )
-          } else {
-            return (
-              <Slide navigation={navigation} currentcard={false} key={item.id} item1={item} item2={i !== posts.length - 1 && posts[i+1]} panResponder={panResponder} rotateAndTranslate={rotateAndTranslate} dislikeOpacity={dislikeOpacity}
-                likeOpacity={likeOpacity} nextCardOpacity={nextCardOpacity} nextCardScale={nextCardScale} SCREEN_HEIGHT={SCREEN_HEIGHT} SCREEN_WIDTH={SCREEN_WIDTH}
-              />
-            )
-          }
-        })}
+        {currentIndex >= posts.length && (
+          <View style={styles.empty}>
+            <Text style={[styles.emptytext, { color: colors.textSecondary }]}>
+              {loadingPosts ? '' : "You're all caught up!"}
+            </Text>
+          </View>
+        )}
+        {/* the next card renders first so the current card sits on top of it */}
+        {posts[currentIndex + 1] && (
+          <Slide navigation={navigation} currentcard={false} key={posts[currentIndex + 1].id} item1={posts[currentIndex + 1]} panResponder={panResponder} rotateAndTranslate={rotateAndTranslate} dislikeOpacity={dislikeOpacity}
+            likeOpacity={likeOpacity} nextCardOpacity={nextCardOpacity} nextCardScale={nextCardScale} SCREEN_HEIGHT={SCREEN_HEIGHT} SCREEN_WIDTH={SCREEN_WIDTH}
+          />
+        )}
+        {posts[currentIndex] && (
+          <Slide navigation={navigation} currentcard={true} key={posts[currentIndex].id} item1={posts[currentIndex]} panResponder={panResponder} rotateAndTranslate={rotateAndTranslate} likeOpacity={likeOpacity}
+            dislikeOpacity={dislikeOpacity} SCREEN_HEIGHT={SCREEN_HEIGHT} SCREEN_WIDTH={SCREEN_WIDTH} muted={muted} setMuted={setMuted}
+          />
+        )}
       </View>
       <View style={{ height: 60 }}></View>
     </View>
@@ -242,5 +234,14 @@ export default function Home({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  empty: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptytext: {
+    fontSize: 18,
+    fontFamily: GlobalStyles.fontSet.fontsemibold,
   },
 });

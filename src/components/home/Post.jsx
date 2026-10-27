@@ -1,7 +1,7 @@
 import React from 'react';
 import {StyleSheet, View, Image, Text, Pressable, TouchableOpacity} from 'react-native';
 import { SimpleLineIcons } from '@expo/vector-icons';
-import GlobalStyles from '../../GlobalStyles';
+import { useTheme } from '../global/ThemeContext';
 
 const img1 = '../../assets/temp/temp3.png';
 import ProfilePicIcon from '../../assets/images/profilepic.svg';
@@ -12,6 +12,9 @@ import PostProfile from '../../assets/icons/user-octagon.svg';
 import SavePost from '../../assets/icons/saveposticon.svg';
 
 export default function Post({marginTop = 0, bottomSheetRef, navigation}) {
+  const { colors } = useTheme();
+  const onImage = { color: colors.onImage };
+
   return (
     <View style={[styles.container, {marginTop: marginTop}]}>
       <Image source={require(img1)} style={styles.img} />
@@ -23,13 +26,13 @@ export default function Post({marginTop = 0, bottomSheetRef, navigation}) {
               height={45}
             />
             <View style={styles.user_details}>
-              <Text style={[styles.user_details_text, {fontFamily: 'Gilroy-Bold'}]}>Reza Nezhadmusavi</Text>
-              <Text style={styles.user_details_text}>Seattle, WA, USA</Text>
+              <Text style={[styles.user_details_text, onImage, {fontFamily: 'Gilroy-Bold'}]}>Reza Nezhadmusavi</Text>
+              <Text style={[styles.user_details_text, onImage]}>Seattle, WA, USA</Text>
               <View style={styles.bubbles}>
-                <View style={styles.bubble1} />
-                <View style={styles.bubble2} />
-                <View style={styles.bubble2} />
-                <View style={styles.bubble2} />
+                <View style={[styles.bubble1, { backgroundColor: colors.onImage }]} />
+                <View style={[styles.bubble2, { backgroundColor: colors.placeholder }]} />
+                <View style={[styles.bubble2, { backgroundColor: colors.placeholder }]} />
+                <View style={[styles.bubble2, { backgroundColor: colors.placeholder }]} />
               </View>
             </View>
           </View>
@@ -37,24 +40,24 @@ export default function Post({marginTop = 0, bottomSheetRef, navigation}) {
             <SimpleLineIcons
               name="options-vertical" 
               size={20}
-              color={GlobalStyles.colorSet.text}
+              color={colors.onImage}
             />
           </Pressable>
         </View>
         <View style={styles.bottom_section}>
           <View style={styles.post_interactions}>
-            <Pressable style={styles.like_button}>
+            <Pressable style={[styles.like_button, { backgroundColor: colors.danger }]}>
               <LikeChosen 
                 height={24}
               />
-              <Text style={styles.post_interactions_text}>115k</Text>
+              <Text style={[styles.post_interactions_text, onImage]}>115k</Text>
             </Pressable>
             <Pressable style={styles.comment_button}>
               <Comments
                 height={24}
                 width={24}
               />
-              <Text style={styles.post_interactions_text}>1.5k</Text>
+              <Text style={[styles.post_interactions_text, onImage]}>1.5k</Text>
             </Pressable>
             <TouchableOpacity style={styles.share_button} onPress={() => {
               bottomSheetRef.current.expand(), 
@@ -112,20 +115,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  user_pic: {
-    width: 40,
-    height: 40,
-    borderWidth: 2,
-    borderRadius: 15,
-    borderColor: '#ffa41b',
-  },
   user_details: {
     marginLeft: 10,
     alignItems: 'flex-start',
   },
   user_details_text: {
     fontSize: 14,
-    color: GlobalStyles.colorSet.text,
     fontFamily: 'Gilroy',
   },
   bubbles: {
@@ -137,13 +132,11 @@ const styles = StyleSheet.create({
   bubble1: {
     width: 15,
     height: 4,
-    backgroundColor: '#fff',
     borderRadius: 2,
   },
   bubble2: {
     width: 4,
     height: 4,
-    backgroundColor: '#777',
     borderRadius: 2,
     marginLeft: 3,
   },
@@ -163,13 +156,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 5,
     paddingHorizontal: 10,
-    backgroundColor: GlobalStyles.colorSet.red7,
     borderRadius: 13,
     marginRight: 20,
     height: 37,
   },
   post_interactions_text: {
-    color: GlobalStyles.colorSet.text,
     marginLeft: 5,
     fontFamily: 'Gilroy',
   },

@@ -13,8 +13,10 @@ import GlobalValues from '../GlobalValues'
 import GlobalStyles from '../GlobalStyles'
 import BottomSheet from '@gorhom/bottom-sheet';
 import SearchBar from '../components/global/SearchBar';
-import DeezerIcon from '../assets/icons/Deezer_Logo_RVB_White.svg'
+import DeezerIconWhite from '../assets/icons/Deezer_Logo_RVB_White.svg'
+import DeezerIconBlack from '../assets/icons/Deezer_Logo_RVB_Black.svg'
 import Song from '../components/create/Song';
+import { useTheme } from '../components/global/ThemeContext';
 
 export default function Create({ navigation }) {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -30,35 +32,28 @@ export default function Create({ navigation }) {
   const [queryresults, setQueryResults] = useState([])
   const [sound, setSound] = useState()
   const [songloading, setSongLoading] = useState(false)
+  const { colors, isDarkMode } = useTheme()
+  const DeezerIcon = isDarkMode ? DeezerIconWhite : DeezerIconBlack
 
   useEffect(() => {
-    if (queryreq.length > 0) {
-      setSongLoading(true)
-      fetch(`https://api.deezer.com/search/track?q=${queryreq}`)
-        .then((res) => res.json())
-        .then((retdata) => {
-          setQueryResults(retdata.data.slice(0, Math.min(9, retdata.data.length)))
-          setSongLoading(false)
-        })
+    if (queryreq.trim().length === 0) {
+      setQueryResults([])
+      return
     }
+    // ignore responses for queries the user has already typed past
+    let stale = false
+    setSongLoading(true)
+    fetch(`https://api.deezer.com/search/track?q=${encodeURIComponent(queryreq)}`)
+      .then((res) => res.json())
+      .then((retdata) => {
+        if (!stale) setQueryResults((retdata.data ?? []).slice(0, 9))
+      })
+      .catch((e) => console.log("Song search failed:", e))
+      .finally(() => {
+        if (!stale) setSongLoading(false)
+      })
+    return () => { stale = true }
   }, [queryreq])
-
-  // fetch emoji symbol after selection
-  useEffect(() => {
-    // if (Object.keys(selectedEmotion).length !== 0) {
-    //   fetch(`https://api.api-ninjas.com/v1/emoji?name=${selectedEmotion.phrase}`, {
-    //     method: 'GET',
-    //     headers: {
-    //       'X-Api-Key': `${EMOJI_KEY}`
-    //     }
-    //   })
-    //     .then((data) => {
-    //       console.log("emoji data:", data)
-    //       setSelectedEmotion({ ...selectedEmotion, emoji: data[0]?.character})
-    //     })
-    // }
-    console.log("chose:", selectedEmotion)
-  }, [selectedEmotion])
 
   async function playSound(link, onPlaybackStatusUpdate) {
     console.log('Loading Sound');
@@ -72,7 +67,7 @@ export default function Create({ navigation }) {
   }
 
   async function stopSound() {
-    await sound.stopAsync()
+    await sound?.stopAsync().catch(() => {})
   }
 
   useEffect(() => {
@@ -85,19 +80,16 @@ export default function Create({ navigation }) {
   }, [sound]);
 
   const handleAnimate = useCallback((fromIndex) => {
-    console.log("fromIndex:", fromIndex)
     if (fromIndex === 1) {
-      navigation.setOptions({ tabBarStyle: GlobalStyles.showTabBar })
+      navigation.setOptions({ tabBarStyle: GlobalStyles.showTabBar(colors) })
     }
-  }, []); // Empty dependency array to ensure stability
+  }, [colors]);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 1,
     });
-
-    console.log("result of picked image:", result)
 
     if (!result.canceled) {
       setSelectedImage(result.assets[0].uri);
@@ -107,7 +99,6 @@ export default function Create({ navigation }) {
 
   const handleEmotionSelection = (emotion) => {
     setSelectedEmotion(emotion);
-    console.log('Selected Emotion:', emotion)
     emotionBSRef.current.close()
   };
 
@@ -117,20 +108,33 @@ export default function Create({ navigation }) {
 
   const handleSongSelection = (song) => {
     setSelectedSong(song);
-    console.log('Selected Song:', selectedSong)
+    stopSound()
     bottomSheetRef.current.close()
   }
 
   async function saveQuote() {
+    if (!selectedImage) {
+      Alert.alert("Please upload a photo first.")
+      return
+    }
+    if (!text.trim()) {
+      Alert.alert("Please enter a message.")
+      return
+    }
     setUploading(true);
-    const uploadUrl = await uploadImageAsync(selectedImage);
-    console.log("SE:", selectedEmotion, "SS:", selectedSong)
-    await addDoc(collection(db, 'quotes'), {
-      ...selectedEmotion, text, uid: auth.currentUser.uid, imglink: uploadUrl, ...selectedSong, username: auth.currentUser.displayName
-    })
-    console.log("download url is:", uploadUrl)
+    try {
+      const uploadUrl = await uploadImageAsync(selectedImage);
+      await addDoc(collection(db, 'quotes'), {
+        ...selectedEmotion, text: text.trim(), uid: auth.currentUser.uid, imglink: uploadUrl, ...selectedSong, username: auth.currentUser.displayName
+      })
+    } catch (e) {
+      console.log("Uploading quote failed:", e)
+      Alert.alert("Upload failed, please try again.")
+      return
+    } finally {
+      setUploading(false)
+    }
     // reset all entries once uploaded
-    setUploading(false)
     setSelectedImage(null)
     setSelectedEmotion({})
     setSelectedSong({})
@@ -167,19 +171,19 @@ export default function Create({ navigation }) {
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView contentContainerStyle={[styles.container]}>
         <View style={styles.imageContainer}>
           {selectedImage ? (
             <View>
               <Image source={{ uri: selectedImage }} style={styles.image} resizeMode="contain" />
-              <TouchableOpacity onPress={handleDeselectPhoto} style={[styles.clickable, {backgroundColor: 'red', marginTop: '2%'}]}>
-                <Text style={[styles.buttontext, styles.deselectPhotoText]}>Deselect Photo</Text>
+              <TouchableOpacity onPress={handleDeselectPhoto} style={[styles.clickable, {backgroundColor: colors.danger, marginTop: '2%'}]}>
+                <Text style={[styles.buttontext, styles.deselectPhotoText, { color: colors.onAccent }]}>Deselect Photo</Text>
               </TouchableOpacity>
             </View>
           ) : (
-            <TouchableOpacity onPress={() => pickImage()} style={styles.clickable}>
-              <Text style={[styles.textstyles, styles.buttontext]}>Upload a Photo</Text>
+            <TouchableOpacity onPress={() => pickImage()} style={[styles.clickable, { backgroundColor: colors.accent }]}>
+              <Text style={[styles.buttontext, { color: colors.onAccent }]}>Upload a Photo</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -189,11 +193,9 @@ export default function Create({ navigation }) {
             fixedAspectRatio={3 / 4}
             imageUri={selectedImage}
             onEditingCancel={() => {
-              console.log("onEditingCancel");
               setShowImageEditor(false)
             }}
             onEditingComplete={(image) => {
-              console.log(image);
               setSelectedImage(image.uri)
               setShowImageEditor(false)
             }}
@@ -202,7 +204,7 @@ export default function Create({ navigation }) {
 
         {/* Emotion button */}
         <TouchableOpacity style={[styles.musicbutton, 
-          { backgroundColor: Object.keys(selectedEmotion).length === 0 ? 'white' : selectedEmotion.color }]} 
+          { backgroundColor: Object.keys(selectedEmotion).length === 0 ? colors.surface : selectedEmotion.color }]} 
           onPress={() => {
             navigation.setOptions({ tabBarStyle: { display: 'none' }})
             emotionBSRef.current.expand()
@@ -210,33 +212,33 @@ export default function Create({ navigation }) {
         }>
           {Object.keys(selectedEmotion).length === 0 ?
             <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
-              <MaterialIcons name="emoji-emotions" size={24} color="black" />
-              <Text>Choose Emotion</Text>
+              <MaterialIcons name="emoji-emotions" size={24} color={colors.text} />
+              <Text style={{ color: colors.text }}>Choose Emotion</Text>
             </View>
           : 
             <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
               {/* <Text>{selectedEmotion.emoji}</Text> */}
-              <Text>{selectedEmotion.phrase}</Text>
+              <Text style={{ color: colors.onPastel }}>{selectedEmotion.phrase}</Text>
             </View>
           }
         </TouchableOpacity>
 
         {/* Song button */}
-        <TouchableOpacity style={styles.musicbutton} onPress={() => {
+        <TouchableOpacity style={[styles.musicbutton, { backgroundColor: colors.surface }]} onPress={() => {
           navigation.setOptions({ tabBarStyle: { display: 'none' }})
           bottomSheetRef.current.expand()
         }}>
           {Object.keys(selectedSong).length === 0 ?
             <View style={{ flexDirection: 'row', columnGap: 8, alignItems: 'center' }}>
-              <Ionicons name="ios-musical-notes" size={24} color="black" />
-              <Text>Choose Song</Text>
+              <Ionicons name="ios-musical-notes" size={24} color={colors.text} />
+              <Text style={{ color: colors.text }}>Choose Song</Text>
             </View>
           :
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Image source={{ uri: selectedSong.pic }} width={50} height={50}  style={{ borderRadius: 6 }} />
               <View style={{ marginLeft: 12, maxWidth: '70%' }}>
-                <Text style={{ color: 'black', fontFamily: GlobalStyles.fontSet.fontsemibold }}>{selectedSong.name}</Text>
-                <Text style={{ color: 'black', fontFamily: GlobalStyles.fontSet.font }}>{selectedSong.artist}</Text>
+                <Text style={{ color: colors.text, fontFamily: GlobalStyles.fontSet.fontsemibold }}>{selectedSong.name}</Text>
+                <Text style={{ color: colors.textSecondary, fontFamily: GlobalStyles.fontSet.font }}>{selectedSong.artist}</Text>
               </View>
             </View>
           }
@@ -244,15 +246,16 @@ export default function Create({ navigation }) {
 
         {/* Add TextInput for entering text */}
         <TextInput
-          style={styles.textInput}
+          style={[styles.textInput, { backgroundColor: colors.input, color: colors.inputText }]}
           value={text}
           onChangeText={setText}
           placeholder="Enter your motivational message here"
-          placeholderTextColor="#FFFFFF80"
+          placeholderTextColor={colors.placeholder}
+          multiline
         />
 
-        <TouchableOpacity style={styles.clickable} onPress={() => saveQuote()} disabled={uploading}>
-          <Text style={styles.buttontext}>{uploading ? "Uploading..." : "Create"}</Text>
+        <TouchableOpacity style={[styles.clickable, { backgroundColor: colors.accent, opacity: uploading ? 0.6 : 1 }]} onPress={() => saveQuote()} disabled={uploading}>
+          <Text style={[styles.buttontext, { color: colors.onAccent }]}>{uploading ? "Uploading..." : "Create"}</Text>
         </TouchableOpacity>
 
       </ScrollView>
@@ -260,8 +263,8 @@ export default function Create({ navigation }) {
         ref={emotionBSRef}
         snapPoints={snapPoints}
         onAnimate={handleAnimate}
-        handleIndicatorStyle={{ backgroundColor: 'white', width: GlobalValues.globalDimensions.width * .133333333, }}
-        backgroundStyle={{ backgroundColor: GlobalStyles.colorSet.neutral11 }}
+        handleIndicatorStyle={{ backgroundColor: colors.text, width: GlobalValues.globalDimensions.width * .133333333, }}
+        backgroundStyle={{ backgroundColor: colors.surface }}
       >
         <ScrollView contentContainerStyle={{ alignItems: 'center', justifyContent: 'flex-start', paddingTop: 8 }}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', columnGap: 8 }}> 
@@ -270,7 +273,7 @@ export default function Create({ navigation }) {
                 style={[styles.emotionButton, {backgroundColor: `hsl(${index * (360 / GlobalValues.emotions.length)}, 50%, 60%)`}]}
                 onPress={() => handleEmotionSelection({ phrase: emotion, color: `hsl(${index * (360 / GlobalValues.emotions.length)}, 50%, 60%)`})}
               >
-                <Text style={{textAlign: 'center'}}>{emotion}</Text>
+                <Text style={{textAlign: 'center', color: colors.onPastel}}>{emotion}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -281,14 +284,14 @@ export default function Create({ navigation }) {
         ref={bottomSheetRef}
         snapPoints={snapPoints}
         onAnimate={handleAnimate}
-        handleIndicatorStyle={{ backgroundColor: 'white', width: GlobalValues.globalDimensions.width * .133333333, }}
-        backgroundStyle={{ backgroundColor: GlobalStyles.colorSet.neutral11 }}
+        handleIndicatorStyle={{ backgroundColor: colors.text, width: GlobalValues.globalDimensions.width * .133333333, }}
+        backgroundStyle={{ backgroundColor: colors.surface }}
       >
         <View style={{ alignItems: 'center', justifyContent: 'center' }}>
           <DeezerIcon width={125} height={50} />
           <SearchBar val={queryreq} setVal={setQueryReq} />
           {songloading ?
-            <ActivityIndicator style={{ marginTop: '4%' }} size="large" color="white" />
+            <ActivityIndicator style={{ marginTop: '4%' }} size="large" color={colors.text} />
           :
             queryresults.length > 0 &&
               <ScrollView style={{ width: '100%', marginTop: '3%' }} contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}>
@@ -347,15 +350,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  selectedEmotion: {
-    backgroundColor: '#007BFF',
-  },
-  textstyles: {
-    color: 'white',
-  },
   textInput: {
-    backgroundColor: '#FFFFFF40',
-    color: '#FFFFFF',
     textAlign: 'center',
     paddingHorizontal: 10,
     paddingVertical: 5,
@@ -364,17 +359,14 @@ const styles = StyleSheet.create({
     width: '90%',
   },
   deselectPhotoText: {
-    color: 'white',
     fontSize: 18,
     textAlign: 'center',
   },
   clickable: {
     borderRadius: 12,
-    backgroundColor: 'lightblue',
     padding: 8,
   },
   buttontext: {
-    color: 'black',
     fontWeight: '700',
     fontSize: 16
   },
@@ -383,7 +375,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'white',
     borderRadius: 12,
     marginBottom: '5%',
     columnGap: 8

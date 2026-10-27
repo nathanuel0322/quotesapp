@@ -8,22 +8,23 @@ import { auth, db, storage } from '../../firebase';
 import ProfileButtons from '../components/profile/ProfileButtons';
 
 import Sepline from '../assets/icons/sepline.svg';
+import { useTheme } from '../components/global/ThemeContext';
 import { doc, getDoc } from 'firebase/firestore';
 
 export default function OtherProfile({ navigation, route }) {
   const [image, setImage] = useState(null); 
   const [follow, setFollow] = useState({})
   const [picexists, setPicExists] = useState(null)
-  const [username, setUsername] = useState(route.params.username)
+  const username = route.params.username
   const [following, setFollowing] = useState()
-  console.log("username is:", route.params.username)
   const pfpRef = ref(storage, `profilepictures/${username}`)
+  const { colors } = useTheme();
   
   useEffect(() => {
     async function followcheck() {
       await getDoc(doc(db, 'users', username))
         .then((val) => {
-          console.log("data:", val.data())
+          if (!val.exists()) return
           setFollow({ followers: val.data().followers, following: val.data().following, likedquotes: val.data().likedquotes, bio: val.data().bio })
         })
         .catch((e) => {
@@ -34,27 +35,23 @@ export default function OtherProfile({ navigation, route }) {
     picchecker()
   }, [])
 
-  useEffect(() => {
-    console.log("follow val now:", follow)
-  }, [follow])
-
   async function picchecker() {
-    console.log("Pic checker starts");
-    const profilepicurl = await getDownloadURL(pfpRef)
-    if (profilepicurl) {
-      console.log('Pic Exists');
-      setPicExists(true)
-      setImage(profilepicurl);
-    }
+    // users without a profile picture have no file in storage, so a failed lookup just keeps the placeholder
+    await getDownloadURL(pfpRef)
+      .then((profilepicurl) => {
+        setPicExists(true)
+        setImage(profilepicurl);
+      })
+      .catch(() => {})
   }
 
   return (
-    <View style={{width: Globals.globalDimensions.width,flexDirection: 'column',flex: 1,}}>
+    <View style={{width: Globals.globalDimensions.width,flexDirection: 'column',flex: 1, backgroundColor: colors.background}}>
       <View style={{top: 22, flexDirection: 'row', position: 'absolute', }}>
         <View style={{ overflow: 'hidden', height: 45, borderRadius: 15, zIndex: 999,left: 15,}}>
-          <BlurView intensity={13}> 
-            <View style={{ fontSize: 14, backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: 15, padding: 11, height: 45, zIndex: 999, }}>
-              <Text style={{ color: 'white', fontFamily: GlobalStyles.fontSet.fontsemibold, top: 3,}}>
+          <BlurView intensity={13} tint={colors.blurTint}> 
+            <View style={{ backgroundColor: colors.glass, borderRadius: 15, padding: 11, height: 45, zIndex: 999, }}>
+              <Text style={{ color: colors.text, fontFamily: GlobalStyles.fontSet.fontsemibold, top: 3,}}>
                 {username}
               </Text> 
             </View>
@@ -64,18 +61,16 @@ export default function OtherProfile({ navigation, route }) {
       <View style={[profilestyles.firstsection,{marginTop: Globals.globalDimensions.height * .075,}]}>
         <View style={[profilestyles.fpfp, {top: Globals.globalDimensions.height < 900 && Globals.globalDimensions.height * .0407608696,}]}>
           <View style={[profilestyles.fpfpP, { top: -10, width: Globals.globalDimensions.width * .136, }]}>
-            <Text style={profilestyles.followtext}>
+            <Text style={[profilestyles.followtext, { color: colors.text }]}>
               {follow.followers?.length}
             </Text>
-            <Text style={{ color: GlobalStyles.colorSet.secondary6, fontSize: 13, fontFamily: GlobalStyles.fontSet.font, }}>
+            <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: GlobalStyles.fontSet.font, }}>
               Followers
             </Text>
           </View>
-          <Pressable style={[profilestyles.fpfpP, { paddingHorizontal: 75, width: Globals.globalDimensions.width * .136, borderRadius: 36, 
+          <View style={[profilestyles.fpfpP, { paddingHorizontal: 75, width: Globals.globalDimensions.width * .136, borderRadius: 36, 
             overflow: 'hidden'
-          }]}
-            onPress={() => pickImage()}
-          >
+          }]}>
             {picexists ?
               <Image
                 source={{ uri: image }}
@@ -91,12 +86,12 @@ export default function OtherProfile({ navigation, route }) {
                     }}
                 />
             }
-          </Pressable>
+          </View>
           <View style={[profilestyles.fpfpP, { top: -10, width: Globals.globalDimensions.width * .154666667, }]} >
-            <Text style={profilestyles.followtext}>
+            <Text style={[profilestyles.followtext, { color: colors.text }]}>
               {follow.following?.length}
             </Text>
-            <Text style={[profilestyles.grays, {fontFamily: GlobalStyles.fontSet.font,fontSize: 13,}]}>
+            <Text style={[profilestyles.grays, {color: colors.textSecondary, fontFamily: GlobalStyles.fontSet.font,fontSize: 13,}]}>
               Following
             </Text>
           </View>
@@ -105,11 +100,11 @@ export default function OtherProfile({ navigation, route }) {
           style={{marginTop: Globals.globalDimensions.height < 900 ? Globals.globalDimensions.height * .06 : 
             Globals.globalDimensions.height * .0172786177,}}
         >
-          <Text style={{  color: 'white',   fontSize: 20,  fontFamily: GlobalStyles.fontSet.fontsemibold,}}>
+          <Text style={{  color: colors.text,   fontSize: 20,  fontFamily: GlobalStyles.fontSet.fontsemibold,}}>
             {username}
           </Text>
         </View>
-        {follow.bio &&
+        {!!follow.bio &&
           <View 
             style={[
               profilestyles.profilebio, 
@@ -121,32 +116,32 @@ export default function OtherProfile({ navigation, route }) {
               }
             ]}
           >
-            <Text style={{color: 'white', fontFamily: GlobalStyles.fontSet.font, textAlign: 'center', fontSize: 15,}}>
+            <Text style={{color: colors.text, fontFamily: GlobalStyles.fontSet.font, textAlign: 'center', fontSize: 15,}}>
               {follow.bio}
             </Text>
           </View>
         }
         <View style={[profilestyles.profilebuttons, {flex: 1, justifyContent: 'center',}]}>
           <Pressable
-            onPress={() => [setFollowing(!following), console.log('following is ' + !following)]}
+            onPress={() => setFollowing(!following)}
             style={[
               profilestyles.buttons, 
               {
                 flexDirection: 'row',
-                backgroundColor: following ? 'transparent' : GlobalStyles.colorSet.primary4,
+                backgroundColor: following ? 'transparent' : colors.primary,
                 justifyContent: 'center',
                 alignItems: 'center',
                 marginRight: 4,
                 width: Globals.globalDimensions.width * .434666667,
                 height: Globals.globalDimensions.height > 900 ?  Globals.globalDimensions.height * .0492610837 : Globals.globalDimensions.height * .06,
                 borderWidth: 2,
-                borderColor: following ? GlobalStyles.colorSet.neutral5 : GlobalStyles.colorSet.primary4, 
+                borderColor: following ? colors.border : colors.primary, 
               }
             ]}
           >
             <Text
               style={{
-                color: 'white',
+                color: following ? colors.text : colors.onAccent,
                 textAlign: 'center',
                 fontFamily: GlobalStyles.fontSet.fontbold,
                 fontSize: 15,
@@ -158,7 +153,7 @@ export default function OtherProfile({ navigation, route }) {
         </View>
       </View>
       <View style={{ marginTop: '85%', alignItems: 'center', marginBottom: 19, }}>
-        <Sepline width={Globals.globalDimensions.width} height={1} preserveAspectRatio="none" />
+        <Sepline width={Globals.globalDimensions.width} height={1} preserveAspectRatio="none" color={colors.text} />
       </View>
       <View style={{marginTop: 50,}}>
         <ProfileButtons />
@@ -174,7 +169,6 @@ const profilestyles = StyleSheet.create({
     marginTop: 'auto',
   },
   grays: {
-    color: GlobalStyles.colorSet.secondary6,
     fontSize: 12,
   },
   firstsection: {
@@ -194,7 +188,6 @@ const profilestyles = StyleSheet.create({
     left: 3,
   },
   profilebio: {
-    color: GlobalStyles.colorSet.secondary6,
     textAlign: 'center',
     width: '.701333333333333%',
   },
@@ -208,11 +201,9 @@ const profilestyles = StyleSheet.create({
   },
   buttons: {
     borderRadius: 15,
-    color: '#FFFFFF',
     fontFamily: "Gilroy",
   },
   followtext: {
-    color: 'white',
     fontFamily: GlobalStyles.fontSet.fontsemibold,
     fontSize: 20,
     paddingBottom: 4

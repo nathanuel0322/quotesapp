@@ -1,14 +1,12 @@
-import { useEffect } from "react"
 import { Text, View } from "react-native"
+import { useTheme } from "../global/ThemeContext"
 
 export default function Posts() {
-    useEffect(() => {
-
-    }, [])
+    const { colors } = useTheme()
 
     return (
         <View>
-            <Text>Posts here!</Text>
+            <Text style={{ color: colors.textSecondary, textAlign: 'center' }}>Posts here!</Text>
         </View>
     )
 }

@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { TouchableOpacity, Image, Text, View, ActivityIndicator } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import GlobalStyles from '../../GlobalStyles';
+import { useTheme } from '../global/ThemeContext';
 
 export default function Song({ parentCallback, val, playSound, stopSound }) {
     const [soundstate, setSoundState] = useState('play')
     const [songplaying, setSongPlaying] = useState(false)
+    const { colors } = useTheme()
     
     // when song finishes playing, change icon back to play
     async function onPlaybackStatusUpdate(status) {
@@ -23,8 +25,8 @@ export default function Song({ parentCallback, val, playSound, stopSound }) {
         }}>
             <Image source={{ uri: val.album.cover }} width={50} height={50}  style={{ borderRadius: 6 }} />
             <View style={{ marginLeft: 12, maxWidth: '70%' }}>
-                <Text style={{ color: 'white', fontFamily: GlobalStyles.fontSet.fontsemibold }}>{val.title}</Text>
-                <Text style={{ color: 'white', fontFamily: GlobalStyles.fontSet.font }}>{val.artist.name}</Text>
+                <Text style={{ color: colors.text, fontFamily: GlobalStyles.fontSet.fontsemibold }}>{val.title}</Text>
+                <Text style={{ color: colors.textSecondary, fontFamily: GlobalStyles.fontSet.font }}>{val.artist.name}</Text>
             </View>
             <TouchableOpacity style={{ position: 'absolute', right: 8 }} onPress={async() => {
                 if (soundstate === 'play') {
@@ -37,12 +39,12 @@ export default function Song({ parentCallback, val, playSound, stopSound }) {
             }}>
                 {/* if song isn't playing, show play icon, but if it is, show loading if mp3 is loading, pause icon if it isn't */}
                 {soundstate === 'play' ? 
-                    <FontAwesome5 name={'play'} size={24} color="white" />
+                    <FontAwesome5 name={'play'} size={24} color={colors.text} />
                 :
                     songplaying ? 
-                        <FontAwesome5 name={'pause'} size={24} color="white" />
+                        <FontAwesome5 name={'pause'} size={24} color={colors.text} />
                     :
-                        <ActivityIndicator size={24} color="white" />
+                        <ActivityIndicator size={24} color={colors.text} />
                 }
             </TouchableOpacity>
         </TouchableOpacity>

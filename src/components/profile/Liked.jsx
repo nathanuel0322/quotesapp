@@ -7,16 +7,14 @@ import { db } from "../../../firebase"
 import { Dimensions } from "react-native"
 import GlobalValues from "../../GlobalValues"
 import DropDownPicker from "react-native-dropdown-picker"
-import { ScrollView } from "react-native"
+import { useTheme } from "../global/ThemeContext"
 
 export default function Liked() {
     const [likedposts, setLikedPosts] = useState([])
     const [open, setOpen] = useState(false)
     const [value, setValue] = useState(null)
     const [items, setItems] = useState([])
-
-    const SCREEN_HEIGHT = Dimensions.get('window').height
-    const SCREEN_WIDTH = Dimensions.get('window').width
+    const { colors, isDarkMode } = useTheme()
 
     useEffect(() => {
         setItems(GlobalValues.emotions.map((val) => ({ label: val, value: val })))
@@ -24,26 +22,13 @@ export default function Liked() {
             const likedposts = JSON.parse(await AsyncStorage.getItem('liked'))
             // console.log("liked posts:", likedposts)
             const querySnapshot = await getDocs(collection(db, 'quotes'))
-            const postsarr = await Promise.all(querySnapshot.docs.map(async(doc) => {
-                // console.log(doc.id, " => ", doc.data())
-                // if one of the post's they've liked is present, add to array
-                if (likedposts?.includes(doc.id)) {
-                    return doc.data();
-                }
-                return null
-            }))
-
-            // Filter out null values (posts that weren't liked)
-            const filteredPosts = postsarr.filter(post => post !== null);
-
-            setLikedPosts(filteredPosts)
+            // keep only the posts they've liked
+            setLikedPosts(querySnapshot.docs
+                .filter((doc) => likedposts?.includes(doc.id))
+                .map((doc) => ({ ...doc.data(), id: doc.id })))
         }
-        fetchPosts()
+        fetchPosts().catch((e) => console.log("Loading liked posts failed:", e))
     }, [])
-
-    useEffect(() => {
-        console.log("\nlikedposts updated:", likedposts)
-    }, [likedposts])
 
     return (
         <View>
@@ -58,15 +43,19 @@ export default function Liked() {
                 min={0}
                 max={5}
                 searchable={true}
+                theme={isDarkMode ? "DARK" : "LIGHT"}
+                style={{ backgroundColor: colors.surface, borderColor: colors.border }}
+                dropDownContainerStyle={{ backgroundColor: colors.surface, borderColor: colors.border }}
+                textStyle={{ color: colors.text }}
+                placeholderStyle={{ color: colors.textSecondary }}
             />
-            <View style={styles.container} contentContainerStyle={{ alignItems: 'center', justifyContent: 'center', }}>
-                {likedposts.map((val, index) => {
-                    console.log(`\nval is:${val.imglink}, lp:${likedposts}\n`)
+            <View style={styles.container}>
+                {likedposts.map((val) => {
                     return (
                         // <View key={index} style={styles.items}>
                         //     <View>
                         //         <View>
-                                    <Image key={index} style={styles.imgstyles}
+                                    <Image key={val.id} style={styles.imgstyles}
                                         source={{ uri: val.imglink }}
                                     />
                                     //middle text
@@ -90,7 +79,10 @@ export default function Liked() {
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        backgroundColor: 'transparent'
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        gap: 8,
+        marginTop: 12,
     },
     items: {
         width: '100%'
@@ -99,31 +91,5 @@ const styles = StyleSheet.create({
         width: 150,
         height: 190,
         borderRadius: 20 
-    },
-    innertext: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexDirection: 'column',
-      backgroundColor: '#0A0B14',
-      maxHeight: '30%',
-      padding: 8,
-      borderRadius: 16
-    },
-    innerview: {
-      zIndex: 1000,
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0, 
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    textstyles: {
-      textAlign: 'center',
-      marginVertical: '2%',
-      color: 'white',
-      fontSize: 20,
-      fontWeight: 'bold',
     },
 })
