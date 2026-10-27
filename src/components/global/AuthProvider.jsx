@@ -4,12 +4,13 @@ import {auth, db} from '../../../firebase';
 import ToastManager, { Toast } from 'toastify-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addDoc, doc, setDoc } from 'firebase/firestore';
-import GlobalStyles from '../../GlobalStyles';
+import { useTheme } from './ThemeContext';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({children}) => {
   const [user, setUser] = useState(null);
+  const { isDarkMode } = useTheme();
   return (
     <AuthContext.Provider
       value={{
@@ -80,7 +81,7 @@ export const AuthProvider = ({children}) => {
         },
       }}
     >
-      <ToastManager width={300} theme="dark" />
+      <ToastManager width={300} theme={isDarkMode ? "dark" : "light"} />
       {children}
     </AuthContext.Provider>
   );

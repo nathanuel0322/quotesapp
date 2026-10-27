@@ -6,11 +6,13 @@ import SignupScreen from '../../screens/SignUpScreen';
 import LoginScreen from '../../screens/LoginScreen';
 
 import { FontAwesome } from '@expo/vector-icons';
-import GlobalStyles from '../../GlobalStyles';
+import { useTheme } from './ThemeContext';
 
 const Stack = createStackNavigator();
 
 const AuthStack = () => {
+  const { colors } = useTheme();
+
   return (
     <Stack.Navigator initialRouteName="Login">
       <Stack.Screen
@@ -24,16 +26,16 @@ const AuthStack = () => {
         options={({navigation}) => ({
           title: '',
           headerStyle: {
-            backgroundColor: GlobalStyles.colorSet.primary1,
-            shadowColor: GlobalStyles.colorSet.primary1,
+            backgroundColor: colors.background,
+            shadowColor: colors.background,
           },
           headerLeft: () => (
             <View style={{marginLeft: 31, marginTop: 70, width: 'auto', height: 100}}>
               <FontAwesome.Button 
                 name="long-arrow-left"
                 size={50}
-                backgroundColor={GlobalStyles.colorSet.primary1}
-                color = {GlobalStyles.colorSet.accent1}
+                backgroundColor={colors.background}
+                color={colors.accentAlt}
                 onPress={() => navigation.navigate('Login')}
               />
             </View>

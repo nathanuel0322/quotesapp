@@ -10,6 +10,7 @@ import Home from '../../screens/Home';
 import Create from '../../screens/Create';
 import GlobalStyles from '../../GlobalStyles';
 import Globals from '../../GlobalValues';
+import { useTheme } from './ThemeContext';
 
 import Sepline from '../../assets/icons/sepline.svg';
 import SwitchIcon from '../../assets/icons/switchicon.svg';
@@ -22,27 +23,26 @@ const Tab = createBottomTabNavigator();
 
 export default function Tabs({ navcontainerRef }) {
   const { logout } = useContext(AuthContext);
+  const { colors } = useTheme();
   const bottomSheetRef = useRef(BottomSheet);
   const snapPoints = useMemo(() => [0.1, '25%'], []);
-  const [tabstyle, setTabStyle] = useState(GlobalStyles.showTabBar);
+  const [tabBarHidden, setTabBarHidden] = useState(false);
 
   const expandBottomSheet = () => {
-    console.log('expanding')
     bottomSheetRef.current.expand();
-    setTabStyle(GlobalStyles.hideTabBar);
+    setTabBarHidden(true);
   };
 
   const handleAnimate = useCallback((fromIndex) => {
-    console.log("fromIndex:", fromIndex)
     if (fromIndex === 1) {
-      setTabStyle(GlobalStyles.showTabBar);
+      setTabBarHidden(false);
     }
   }, []); // Empty dependency array to ensure stability
 
   return (
-    <GestureHandlerRootView style={styles.container}>
+    <GestureHandlerRootView style={[styles.container, { backgroundColor: colors.background }]}>
       <Tab.Navigator
-        screenOptions={{ tabBarShowLabel: false, tabBarStyle: tabstyle, }}
+        screenOptions={{ tabBarShowLabel: false, tabBarStyle: tabBarHidden ? GlobalStyles.hideTabBar : GlobalStyles.showTabBar(colors), }}
       >
         <Tab.Screen
           name="HomeStack"
@@ -51,7 +51,7 @@ export default function Tabs({ navcontainerRef }) {
             headerShown: false,
             tabBarIcon: ({focused}) => (
               <View>
-                <MaterialCommunityIcons name="window-closed-variant" size={24} color={focused ? GlobalStyles.colorSet.blue6 : "white"} />
+                <MaterialCommunityIcons name="window-closed-variant" size={24} color={focused ? colors.accent : colors.text} />
               </View>
             ),
           }}
@@ -63,7 +63,7 @@ export default function Tabs({ navcontainerRef }) {
             headerShown: false,
             tabBarIcon: ({focused}) => (
               <View>
-                <MaterialCommunityIcons name="plus" size={24} color={focused ? GlobalStyles.colorSet.blue6 : "white"} />
+                <MaterialCommunityIcons name="plus" size={24} color={focused ? colors.accent : colors.text} />
               </View>
             ),
           }}
@@ -75,7 +75,7 @@ export default function Tabs({ navcontainerRef }) {
             headerShown: false,
             tabBarIcon: ({focused}) => (
               <View>
-                <Ionicons name="person" size={24} color={focused ? GlobalStyles.colorSet.blue6 : "white"} />
+                <Ionicons name="person" size={24} color={focused ? colors.accent : colors.text} />
               </View>
             ),
           }}
@@ -86,35 +86,38 @@ export default function Tabs({ navcontainerRef }) {
           options={{ tabBarButton: () => null, headerShown: false }}
         />
       </Tab.Navigator>
-      <TouchableOpacity style={styles.settingsbutton} onPress={() => expandBottomSheet()}>
-        <Feather name="settings" size={30} color="white" />
+      <TouchableOpacity style={[styles.settingsbutton, { backgroundColor: colors.accent }]} onPress={() => expandBottomSheet()}>
+        <Feather name="settings" size={30} color={colors.onAccent} />
       </TouchableOpacity>
       <BottomSheet
         ref={bottomSheetRef}
         index={0}
         snapPoints={snapPoints}
         onAnimate={handleAnimate}
-        handleIndicatorStyle={{ backgroundColor: 'white', width: Globals.globalDimensions.width * .133333333, }}
-        backgroundStyle={{ backgroundColor: GlobalStyles.colorSet.neutral11 }}
+        handleIndicatorStyle={{ backgroundColor: colors.text, width: Globals.globalDimensions.width * .133333333, }}
+        backgroundStyle={{ backgroundColor: colors.surface }}
       >
         <View style={{ flex: 1, alignItems: 'flex-start', marginLeft: 27,}}>
           <Pressable style={styles.bottomsheetpressables} onPress={() => {
             bottomSheetRef.current.close()
-            navcontainerRef.current?.navigate('SettingsStack')
+            navcontainerRef.current?.navigate('SettingsStack', { screen: 'Settings' })
           }}>
-            <MaterialCommunityIcons name="dots-horizontal" size={24} color="white" />
-            <Text style={styles.bottomsheetpressablestext}>Settings</Text>
+            <MaterialCommunityIcons name="dots-horizontal" size={24} color={colors.text} />
+            <Text style={[styles.bottomsheetpressablestext, { color: colors.text }]}>Settings</Text>
           </Pressable>
           <View style={{left: 0, marginLeft: -27,}}>
-            <Sepline width={Globals.globalDimensions.width} height={1} preserveAspectRatio="none" />
+            <Sepline width={Globals.globalDimensions.width} height={1} preserveAspectRatio="none" color={colors.text} />
           </View>
           <Pressable style={styles.bottomsheetpressables}>
-            <SwitchIcon />
-            <Text style={styles.bottomsheetpressablestext}>Switch Account</Text>
+            <SwitchIcon color={colors.text} />
+            <Text style={[styles.bottomsheetpressablestext, { color: colors.text }]}>Switch Account</Text>
           </Pressable>
-          <Pressable style={styles.bottomsheetpressables} onPress={() => logout()}>
+          <Pressable style={styles.bottomsheetpressables} onPress={() => {
+            bottomSheetRef.current.close()
+            logout()
+          }}>
             <LogoutIcon />
-            <Text style={[styles.bottomsheetpressablestext, {color: GlobalStyles.colorSet.red7,}]}>Logout</Text>
+            <Text style={[styles.bottomsheetpressablestext, {color: colors.danger,}]}>Logout</Text>
           </Pressable>
         </View>
       </BottomSheet>
@@ -125,7 +128,6 @@ export default function Tabs({ navcontainerRef }) {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    backgroundColor: GlobalStyles.colorSet.background,
     flexDirection: 'column',
     flex: 1,
   },
@@ -139,7 +141,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 20,
     right: 20,
-    backgroundColor: GlobalStyles.colorSet.blue6,
     padding: 10,
     borderRadius: 16
   },
@@ -153,7 +154,6 @@ const styles = StyleSheet.create({
   },
 
   bottomsheetpressablestext: {
-    color: 'white', 
     fontFamily: GlobalStyles.fontSet.fontsemibold, 
     fontSize: 16, 
     marginLeft: 13,

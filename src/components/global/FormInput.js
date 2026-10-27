@@ -1,17 +1,19 @@
 import React from 'react';
 import {View, TextInput, StyleSheet} from 'react-native';
-import GlobalStyles from '../../GlobalStyles';
+import { useTheme } from './ThemeContext';
 import Globals from '../../GlobalValues';
 
 const FormInput = ({labelValue, placeholderText, iconType, ...rest}) => {
+  const { colors } = useTheme();
+
   return (
-    <View style={styles.inputView}>
+    <View style={[styles.inputView, { backgroundColor: colors.input }]}>
       <TextInput
         value={labelValue}
-        style={[styles.TextInput, {fontFamily: 'Gilroy'}]}
+        style={[styles.TextInput, {fontFamily: 'Gilroy', color: colors.inputText}]}
         numberOfLines={1}
         placeholder={placeholderText}
-        placeholderTextColor="#666"
+        placeholderTextColor={colors.placeholder}
         {...rest}
       />
     </View>
@@ -22,7 +24,6 @@ export default FormInput;
 
 const styles = StyleSheet.create({
   inputView: {
-    backgroundColor: GlobalStyles.colorSet.white,
     borderRadius: 30,
     width: Globals.isLoading ? Globals.globalDimensions.width * .7 : 300,
     height: 45,

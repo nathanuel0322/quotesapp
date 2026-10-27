@@ -4,9 +4,18 @@ import { useFonts } from 'expo-font';
 
 import Providers from './src/components/global/index.js';
 import Globals from './src/GlobalValues';
-import { ThemeProvider } from './src/components/global/ThemeContext.jsx';
+import { ThemeProvider, useTheme } from './src/components/global/ThemeContext.jsx';
 
 export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  )
+}
+
+function AppContent() {
+  const { colors } = useTheme();
   Globals.globalDimensions = useWindowDimensions();
   Globals.isLoading = true;
   Globals.platform = Platform.OS;
@@ -19,17 +28,13 @@ export default function App() {
 
   if (!fontsLoaded) {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" />
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.text} />
       </View>
     )
   }
 
-  return (
-    <ThemeProvider>
-      <Providers />
-    </ThemeProvider>
-  )
+  return <Providers />
 }
 
 const styles = StyleSheet.create({
@@ -37,6 +42,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0A0B14'
   },
 })

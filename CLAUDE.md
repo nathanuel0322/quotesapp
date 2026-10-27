@@ -27,7 +27,8 @@ npm run web        # expo start --web
 - Users are identified by **username** throughout the app, not uid (only the logged-in user can access their uid).
 - Home is a Stack navigator (profiles are reachable from it); the logged-in user's profile and other users' profiles are separate components (`Profile.jsx` vs `OtherProfile.jsx`).
 - Liking uses a hybrid of local state and Firestore for responsiveness.
-- Theme colors come from `ThemeContext`; avoid hardcoding colors in new components.
+- Theme colors come from `useTheme().colors` (palettes in `GlobalStyles.themes`); avoid hardcoding colors in new components. The preference (`system`/`light`/`dark`) persists in AsyncStorage under `THEME_PREFERENCE`.
+- Single-color SVG icons use `currentColor`, so pass `color={colors.text}` (or another token) wherever they're rendered; without it they draw black.
 
 ## Dependencies
 

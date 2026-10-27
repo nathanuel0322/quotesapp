@@ -6,7 +6,7 @@ import { auth } from '../../../firebase';
 import { AuthContext } from './AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import Theme from './theme';
+import { useTheme } from './ThemeContext';
 import Globals  from '../../GlobalValues';
 import Tabs from './bottomNavigation';
 import AuthStack from './AuthStack';
@@ -18,6 +18,7 @@ export const Routes = () => {
   const [initialState, setInitialState] = useState();
   const {user, setUser} = useContext(AuthContext);
   const navcontainerRef = createRef();
+  const { colors, navigationTheme } = useTheme();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, setUser); 
@@ -49,7 +50,11 @@ export const Routes = () => {
   }, [isReady]);
 
   if (!isReady) {
-    return <ActivityIndicator />
+    return (
+      <View style={[styles.safearea, styles.loading, { backgroundColor: colors.background }]}>
+        <ActivityIndicator color={colors.text} />
+      </View>
+    )
   }
   
   if (auth.currentUser != null){
@@ -57,12 +62,12 @@ export const Routes = () => {
   }
 
   return (
-    <SafeAreaView style={styles.safearea}>
-      <NavigationContainer initialState={initialState} theme={Theme} ref={navcontainerRef} onStateChange={(state) => 
+    <SafeAreaView style={[styles.safearea, { backgroundColor: colors.background }]}>
+      <NavigationContainer initialState={initialState} theme={navigationTheme} ref={navcontainerRef} onStateChange={(state) => 
         AsyncStorage.setItem(PERSISTENCE_KEY, JSON.stringify(state))
       }>
-        <View style={styles.safearea}>
-          <StatusBar barStyle="light-content" />
+        <View style={[styles.safearea, { backgroundColor: colors.background }]}>
+          <StatusBar barStyle={colors.statusBarStyle} backgroundColor={colors.background} />
           {user ? 
             <Tabs navcontainerRef={navcontainerRef} />
           : 
@@ -78,6 +83,9 @@ const styles = StyleSheet.create({
   safearea: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#0A0B14',
-  }, 
+  },
+  loading: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
