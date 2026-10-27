@@ -13,6 +13,7 @@ import { useTheme } from '../components/global/ThemeContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { updateProfile } from 'firebase/auth';
 import { Toast } from 'toastify-react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function Profile({ navigation }) {
   const [uploading, setUploading] = useState(null);
@@ -22,29 +23,28 @@ export default function Profile({ navigation }) {
   const pfpRef = ref(storage, `profilepictures/${auth.currentUser.displayName}`)
   const { colors } = useTheme();
   
-  useEffect(() => {
+  // reload on focus so a username or picture changed in Settings shows up here
+  useFocusEffect(useCallback(() => {
     async function followcheck() {
       await getDoc(doc(db, 'users', auth.currentUser.displayName))
         .then((val) => {
           if (!val.exists()) return
           setFollow({ followers: val.data().followers, following: val.data().following, likedquotes: val.data().likedquotes, bio: val.data().bio })
         })
+        .catch((e) => console.log("Loading profile failed:", e))
     }
     followcheck()
     picchecker()
-  }, [])
+  }, []))
 
   async function picchecker() {
-    await getDownloadURL(pfpRef)
-      .then(async (link) => {
-        if (link) {
-          setPicExists(true)
-          setImage(link);
-        }
+    // read the name at call time; the focus callback above outlives renames
+    await getDownloadURL(ref(storage, `profilepictures/${auth.currentUser.displayName}`))
+      .then((link) => {
+        setPicExists(true)
+        setImage(link);
       })
-      .catch((e) => {
-        console.log("e:", e)
-      })
+      .catch(() => setPicExists(false))
   }
 
   async function pickImage() {

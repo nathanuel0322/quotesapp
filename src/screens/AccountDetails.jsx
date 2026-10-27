@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, Keyboard } from 'react-native';
 import GlobalStyles from '../GlobalStyles';
 import Globals from '../GlobalValues';
 import FormInput from '../components/global/FormInput';
-import { auth, db } from '../../firebase';
+import { auth } from '../../firebase';
 import ArrowLeftIcon from '../assets/icons/arrowlefticon.svg';
-import { updateProfile } from 'firebase/auth';
-import { Toast } from 'toastify-react-native';
-import { collection, doc, getDocs, updateDoc } from 'firebase/firestore';
+import { AuthContext } from '../components/global/AuthProvider';
 import { useTheme } from '../components/global/ThemeContext';
 
 export default function AccountDetails({ navigation }) {
   const [currentName, setCurrentName] = useState(auth.currentUser.displayName);
+  const [saving, setSaving] = useState(false);
   const { colors } = useTheme();
+  const { changeUsername } = useContext(AuthContext);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -33,20 +33,16 @@ export default function AccountDetails({ navigation }) {
       <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginTop: '10%' }}>
         <Text style={[settingsstyles.settingspressablestext, { color: colors.text, marginBottom: '5%'}]}>Username</Text>
           <FormInput labelValue={currentName} onChangeText={setCurrentName} autoCapitalize="none" autoCorrect={false} />
-          <TouchableOpacity style={[settingsstyles.changes, { backgroundColor: colors.primary }]} onPress={async() => {
-            Keyboard.dismiss();
-            await updateProfile(auth.currentUser, { displayName: currentName })
-              .then(async() => {
-                const querySnapshot = await getDocs(collection(db, 'quotes'))
-                querySnapshot.forEach(async(retdoc) => {
-                  if (retdoc.data().uid === auth.currentUser.uid) {
-                    await updateDoc(doc(db, 'quotes', retdoc.id), { username: currentName })
-                  }
-                })
-                Toast.success('Profile updated!')
-              })
-          }}>
-            <Text style={[settingsstyles.settingspressablestext, { color: colors.onAccent }]}>Confirm Changes</Text>
+          <TouchableOpacity style={[settingsstyles.changes, { backgroundColor: colors.primary, opacity: saving ? 0.6 : 1 }]} disabled={saving}
+            onPress={async() => {
+              Keyboard.dismiss();
+              setSaving(true);
+              const changed = await changeUsername(currentName);
+              setSaving(false);
+              setCurrentName(changed ? currentName.trim() : auth.currentUser.displayName);
+            }}
+          >
+            <Text style={[settingsstyles.settingspressablestext, { color: colors.onAccent }]}>{saving ? 'Saving...' : 'Confirm Changes'}</Text>
           </TouchableOpacity>
       </View>
     </View>
