@@ -4,6 +4,7 @@ import { BlurView } from 'expo-blur';
 import GlobalStyles from '../GlobalStyles';
 import Globals from '../GlobalValues';
 import SettingsStackHeader from '../components/settings/SettingsStackHeader';
+import { useTheme } from '../components/global/ThemeContext';
 
 import EstherIcon from '../assets/images/EstherIcon.svg'; 
 import RezaIcon from '../assets/images/RezaIcon.svg'; 
@@ -16,28 +17,30 @@ let mutedarr = [
 ];
 
 export default function MutedAccounts({navigation}) {
+  const { colors } = useTheme();
+
   return (
-    <View>
-        <SettingsStackHeader navigation={navigation} currentPage={'Muted Accounts'} navtoPage={'Privacy'} hideRightButton={true} />
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <SettingsStackHeader navigation={navigation} currentPage={'Muted Accounts'} hideRightButton={true} />
         <ScrollView style={{height: Globals.globalDimensions.height * .708}}>
             {mutedarr.map((item, key) => (
-                <View key={key} style={[blockedstyles.blockedviews, {paddingTop: 17, paddingBottom: 24,}]} onPress={() => [console.log('Wallet pressed')]}>
+                <View key={key} style={[blockedstyles.blockedviews, {paddingTop: 17, paddingBottom: 24,}]}>
                     {item[0]}
                     <View style={{marginLeft: 14,}}>
-                        <Text style={[blockedstyles.blockedviewstext, {fontFamily: GlobalStyles.fontSet.fontsemibold, fontSize: 16, paddingBottom: 8,}]}>{item[1]}</Text>
-                        <Text style={[blockedstyles.blockedviewstext, {fontFamily: GlobalStyles.fontSet.font, fontSize: 14,}]}>{item[2]}</Text>
+                        <Text style={[blockedstyles.blockedviewstext, {color: colors.text, fontFamily: GlobalStyles.fontSet.fontsemibold, fontSize: 16, paddingBottom: 8,}]}>{item[1]}</Text>
+                        <Text style={[blockedstyles.blockedviewstext, {color: colors.textSecondary, fontFamily: GlobalStyles.fontSet.font, fontSize: 14,}]}>{item[2]}</Text>
                     </View>
                     <TouchableOpacity onPress={() => console.log("Unmuted!")} style={{overflow: 'hidden', 
                         width: Globals.globalDimensions.width * .242666667, height: Globals.globalDimensions.height * .0492610837, borderRadius: 15,
                         marginLeft: 'auto'}}
                     >
-                        <BlurView intensity={5} 
-                            style={{backgroundColor: GlobalStyles.colorSet.neutral11, borderRadius: 15, 
+                        <BlurView intensity={5} tint={colors.blurTint}
+                            style={{backgroundColor: colors.surface, borderRadius: 15, 
                                 width: Globals.globalDimensions.width * .242666667, height: Globals.globalDimensions.height * .0492610837, 
                                 alignItems: 'center',justifyContent: 'center',
                             }}
                         >
-                            <Text style={{color: 'white', fontFamily: GlobalStyles.fontSet.fontbold, fontSize: 14,}}>Unmute</Text>
+                            <Text style={{color: colors.text, fontFamily: GlobalStyles.fontSet.fontbold, fontSize: 14,}}>Unmute</Text>
                         </BlurView>
                     </TouchableOpacity>
                 </View>
@@ -57,21 +60,5 @@ const blockedstyles = StyleSheet.create({
     width: '100%',
   },
   
-  blockedviewstext: {
-    color: 'white', 
-  },
-
-  aboutbutton: {
-    flexDirection: 'row', 
-    marginLeft: 24,
-    alignItems: 'center',
-    paddingVertical: 32,
-  },
-
-  abouttext: {
-    color: 'white', 
-    fontFamily: GlobalStyles.fontSet.fontsemibold, 
-    fontSize: 18, 
-    marginLeft: 9,
-  },
+  blockedviewstext: {},
 })

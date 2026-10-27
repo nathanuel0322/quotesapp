@@ -3,6 +3,7 @@ import {Text, View, StyleSheet, TouchableOpacity} from 'react-native';
 import { BlurView } from 'expo-blur';
 import GlobalStyles from '../GlobalStyles';
 import Globals from '../GlobalValues';
+import { useTheme } from '../components/global/ThemeContext';
 
 import ArrowLeftIcon from '../assets/icons/arrowlefticon.svg'; 
 import WalletIcon from '../assets/icons/walleticon.svg'; 
@@ -13,83 +14,62 @@ import PrivacyIcon from '../assets/icons/privacyicon.svg';
 import AccountIcon from '../assets/icons/accountdetailicon.svg';
 
 export default function SocialMedia({navigation}) {
+  const { colors } = useTheme();
+  const textStyle = [settingsstyles.settingspressablestext, { color: colors.text }];
 
   useEffect(() => {
-    navigation.getParent()?.setOptions({
-      tabBarStyle: {
-        display: "none",
-      }
-    });
-    return () => navigation.getParent()?.setOptions({
-        tabBarStyle: {display: 'flex',
-            position: 'absolute',
-            bottom: 25,
-            left: 20,
-            right: 20,
-            elevation: 24,
-            backgroundColor: GlobalStyles.colorSet.primary1,
-            borderRadius: 25,
-            height: 70,
-            width: Globals.globalDimensions.width * 0.914666667,
-            shadowOffset: {
-              width: 0,
-              height: 12,
-            },
-            shadowOpacity: 0.58,
-            shadowRadius: 16.0,
-            opacity: 1,
-          },
-    });
-  }, [navigation]);
+    navigation.getParent()?.setOptions({ tabBarStyle: GlobalStyles.hideTabBar });
+    return () => navigation.getParent()?.setOptions({ tabBarStyle: GlobalStyles.showTabBar(colors) });
+  }, [navigation, colors]);
 
   return (
-    <View>
-        <View style={{backgroundColor: GlobalStyles.colorSet.neutral12, flexDirection: 'row',
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <View style={{backgroundColor: colors.header, flexDirection: 'row',
             width: '100%', height: Globals.globalDimensions.height * .184729064, alignItems: 'center'}}
         >
             <TouchableOpacity style={{marginLeft: 27, overflow: 'hidden', width: Globals.globalDimensions.width * .133333333, 
                     height: Globals.globalDimensions.width * .133333333, borderRadius: 46, top: 10,}}
-                onPress={() => navigation.navigate("ProfileMain")}
+                onPress={() => navigation.goBack()}
             >
-                <BlurView intensity={5} 
-                    style={{backgroundColor: GlobalStyles.colorSet.neutral11, borderRadius: 46, 
+                <BlurView intensity={5} tint={colors.blurTint}
+                    style={{backgroundColor: colors.surface, borderRadius: 46, 
                         width: Globals.globalDimensions.width * .133333333, height: Globals.globalDimensions.width * .133333333, 
                         alignItems: 'center',justifyContent: 'center',
                     }}
                 >
-                    <ArrowLeftIcon />
+                    <ArrowLeftIcon color={colors.text} />
                 </BlurView>
             </TouchableOpacity>
-            <Text style={{color: 'white', fontFamily: GlobalStyles.fontSet.fontsemibold, fontSize: 20, 
+            <Text style={{color: colors.text, fontFamily: GlobalStyles.fontSet.fontsemibold, fontSize: 20, 
                 paddingLeft: Globals.globalDimensions.width * .215, top: 10,}}
             >
                 Settings
             </Text>
         </View>
         <View style={{left: 0}}>
-            <TouchableOpacity style={[settingsstyles.settingspressables, {paddingTop: 24 ,paddingBottom: 32,}]} onPress={() => [console.log('Wallet pressed')]}>
-                <WalletIcon />
-                <Text style={settingsstyles.settingspressablestext}>Wallet</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={settingsstyles.settingspressables} onPress={() => console.log(navigation.getState().index)}>
-                <LanguageIcon />
-                <Text style={settingsstyles.settingspressablestext}>Language</Text>
+            <TouchableOpacity style={[settingsstyles.settingspressables, {paddingTop: 24 ,paddingBottom: 32,}]}>
+                <WalletIcon color={colors.text} />
+                <Text style={textStyle}>Wallet</Text>
             </TouchableOpacity>
             <TouchableOpacity style={settingsstyles.settingspressables}>
-                <CountryIcon />
-                <Text style={settingsstyles.settingspressablestext}>Country</Text>
+                <LanguageIcon color={colors.text} />
+                <Text style={textStyle}>Language</Text>
             </TouchableOpacity>
             <TouchableOpacity style={settingsstyles.settingspressables}>
-                <SocialMediaIcon />
-                <Text style={settingsstyles.settingspressablestext}>Social Media</Text>
+                <CountryIcon color={colors.text} />
+                <Text style={textStyle}>Country</Text>
             </TouchableOpacity>
             <TouchableOpacity style={settingsstyles.settingspressables}>
-                <PrivacyIcon />
-                <Text style={settingsstyles.settingspressablestext}>Privacy</Text>
+                <SocialMediaIcon color={colors.text} />
+                <Text style={textStyle}>Social Media</Text>
             </TouchableOpacity>
             <TouchableOpacity style={settingsstyles.settingspressables}>
-                <AccountIcon />
-                <Text style={settingsstyles.settingspressablestext}>Account Details</Text>
+                <PrivacyIcon color={colors.text} />
+                <Text style={textStyle}>Privacy</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={settingsstyles.settingspressables}>
+                <AccountIcon color={colors.text} />
+                <Text style={textStyle}>Account Details</Text>
             </TouchableOpacity>
         </View>
     </View>
@@ -105,7 +85,6 @@ const settingsstyles = StyleSheet.create({
   },
   
   settingspressablestext: {
-    color: 'white', 
     fontFamily: GlobalStyles.fontSet.fontsemibold, 
     fontSize: 18, 
     marginLeft: 9,

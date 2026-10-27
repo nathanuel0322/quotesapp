@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import {Text, View, StyleSheet, TouchableOpacity} from 'react-native';
+import React from 'react';
+import {Text, View, StyleSheet, TouchableOpacity, Switch as SystemSwitch} from 'react-native';
 import GlobalStyles from '../GlobalStyles';
 import SettingsStackHeader from '../components/settings/SettingsStackHeader';
 import { Switch } from 'react-native-switch';
@@ -9,23 +9,23 @@ import CountryIcon from '../assets/icons/countryicon.svg';
 import SocialMediaIcon from '../assets/icons/socialmediaicon.svg';
 import PrivacyIcon from '../assets/icons/privacyicon.svg';
 import AccountIcon from '../assets/icons/accountdetailicon.svg';
-import ArrowLeftIcon from '../assets/icons/arrowlefticon.svg';
 import { MaterialIcons, Feather } from '@expo/vector-icons';
 import { useTheme } from '../components/global/ThemeContext';
 
 export default function Settings({navigation}) {
-  const { isDarkMode, toggleTheme } = useTheme()
+  const { isDarkMode, toggleTheme, preference, setPreference, colors } = useTheme()
+  const followsSystem = preference === 'system'
+  const textStyle = [settingsstyles.settingspressablestext, { color: colors.text }]
 
   return (
-    <View>
-      <TouchableOpacity style={settingsstyles.backbutton} onPress={() => navigation.goBack()}>
-        <ArrowLeftIcon width={30} height={30} />
-      </TouchableOpacity>
-      <SettingsStackHeader navigation={navigation} currentPage={'Settings'} navtoPage={'ProfileMain'} hideRightButton={true} />
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <SettingsStackHeader navigation={navigation} currentPage={'Settings'} hideRightButton={true} />
       <View style={{left: 0}}>
-        <View style={settingsstyles.settingspressables}>
-          <MaterialIcons name="wb-twighlight" size={24} color="white" />
-          <Text style={[settingsstyles.settingspressablestext, {marginRight: '40%', color: isDarkMode ? 'white' : 'black',}]}>Appearance</Text>
+        <View style={[settingsstyles.settingspressables, settingsstyles.togglerow]}>
+          <View style={settingsstyles.rowlabel}>
+            <MaterialIcons name="wb-twilight" size={24} color={colors.text} />
+            <Text style={textStyle}>Dark Mode</Text>
+          </View>
           <Switch
             value={isDarkMode}
             onValueChange={toggleTheme}
@@ -35,36 +35,51 @@ export default function Settings({navigation}) {
             circleSize={40}
             barHeight={40}
             circleBorderWidth={2}
-            backgroundActive={'gray'}
-            backgroundInactive={'white'}
-            circleActiveColor={'#000000'}
-            circleInActiveColor={'white'}
-            renderInsideCircle={() => isDarkMode ? <Feather name="moon" size={27} color="white" /> : <Feather name="sun" size={27} color="orange" />} // custom component to render inside the Switch circle (Text, Image, etc.)
+            backgroundActive={colors.surface}
+            backgroundInactive={colors.switchTrackOff}
+            circleActiveColor={colors.background}
+            circleInActiveColor={colors.background}
+            circleBorderActiveColor={colors.border}
+            circleBorderInactiveColor={colors.border}
+            renderInsideCircle={() => isDarkMode ? <Feather name="moon" size={27} color={colors.text} /> : <Feather name="sun" size={27} color={colors.primary} />} // custom component to render inside the Switch circle (Text, Image, etc.)
             changeValueImmediately={true} // if rendering inside circle, change state immediately or wait for animation to complete
             renderActiveText={false}
             renderInActiveText={false}
             switchWidthMultiplier={2} // multiplied by the `circleSize` prop to calculate total width of the Switch
           />
         </View>
-          <TouchableOpacity style={settingsstyles.settingspressables} onPress={() => navigation.navigate("Languages")}>
-              <LanguageIcon />
-              <Text style={[settingsstyles.settingspressablestext, {color: isDarkMode ? 'white' : 'black',}]}>Language</Text>
+        <View style={[settingsstyles.settingspressables, settingsstyles.togglerow, { paddingTop: 0 }]}>
+          <View style={settingsstyles.rowlabel}>
+            <MaterialIcons name="brightness-auto" size={24} color={colors.text} />
+            <Text style={textStyle}>Match System</Text>
+          </View>
+          <SystemSwitch
+            value={followsSystem}
+            onValueChange={(value) => setPreference(value ? 'system' : (isDarkMode ? 'dark' : 'light'))}
+            trackColor={{ false: colors.switchTrackOff, true: colors.dangerSoft }}
+            thumbColor={colors.onAccent}
+            ios_backgroundColor={colors.switchTrackOff}
+          />
+        </View>
+          <TouchableOpacity style={settingsstyles.settingspressables}>
+              <LanguageIcon color={colors.text} />
+              <Text style={textStyle}>Language</Text>
           </TouchableOpacity>
           <TouchableOpacity style={settingsstyles.settingspressables}>
-              <CountryIcon />
-              <Text style={[settingsstyles.settingspressablestext, { color: isDarkMode ? 'white' : 'black' }]}>Country</Text>
+              <CountryIcon color={colors.text} />
+              <Text style={textStyle}>Country</Text>
           </TouchableOpacity>
           <TouchableOpacity style={settingsstyles.settingspressables}>
-              <SocialMediaIcon />
-              <Text style={[settingsstyles.settingspressablestext, { color: isDarkMode ? 'white' : 'black' }]}>Social Media</Text>
+              <SocialMediaIcon color={colors.text} />
+              <Text style={textStyle}>Social Media</Text>
           </TouchableOpacity>
           <TouchableOpacity style={settingsstyles.settingspressables} onPress={() => navigation.navigate("Privacy")}>
-              <PrivacyIcon />
-              <Text style={[settingsstyles.settingspressablestext, { color: isDarkMode ? 'white' : 'black' }]}>Privacy</Text>
+              <PrivacyIcon color={colors.text} />
+              <Text style={textStyle}>Privacy</Text>
           </TouchableOpacity>
           <TouchableOpacity style={settingsstyles.settingspressables} onPress={() => navigation.navigate("AccountDetails")}>
-              <AccountIcon />
-              <Text style={[settingsstyles.settingspressablestext, { color: isDarkMode ? 'white' : 'black' }]}>Account Details</Text>
+              <AccountIcon color={colors.text} />
+              <Text style={textStyle}>Account Details</Text>
           </TouchableOpacity>
       </View>
     </View>
@@ -78,19 +93,17 @@ const settingsstyles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 32,
   },
-  
+  togglerow: {
+    justifyContent: 'space-between',
+    marginRight: 24,
+  },
+  rowlabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   settingspressablestext: {
     fontFamily: GlobalStyles.fontSet.fontsemibold, 
     fontSize: 18, 
     marginLeft: 9,
-  },
-  backbutton: {
-    position: 'absolute',
-    top: 20,
-    left: 20,
-    backgroundColor: GlobalStyles.colorSet.blue6,
-    padding: 10,
-    borderRadius: 16,
-    zIndex: 999
   },
 })

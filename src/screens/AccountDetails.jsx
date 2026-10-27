@@ -8,28 +8,32 @@ import ArrowLeftIcon from '../assets/icons/arrowlefticon.svg';
 import { updateProfile } from 'firebase/auth';
 import { Toast } from 'toastify-react-native';
 import { collection, doc, getDocs, updateDoc } from 'firebase/firestore';
+import { useTheme } from '../components/global/ThemeContext';
 
 export default function AccountDetails({ navigation }) {
   const [currentName, setCurrentName] = useState(auth.currentUser.displayName);
+  const { colors } = useTheme();
 
   return (
-    <View>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={[settingsstyles.topview,
-        {backgroundColor: GlobalStyles.colorSet.neutral12,  height: Globals.globalDimensions.height * .184729064}
+        {backgroundColor: colors.header,  height: Globals.globalDimensions.height * .184729064}
       ]}>
-        <TouchableOpacity style={settingsstyles.backbutton} onPress={() => navigation.navigate("Settings")}>
-          <ArrowLeftIcon width={30} height={30} />
+        <TouchableOpacity style={[settingsstyles.backbutton, { backgroundColor: colors.accent }]} onPress={() => navigation.goBack()}
+          accessibilityRole="button" accessibilityLabel="Back"
+        >
+          <ArrowLeftIcon width={30} height={30} color={colors.onAccent} />
         </TouchableOpacity>
         <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-          <Text style={{color: 'white', fontFamily: GlobalStyles.fontSet.fontsemibold, fontSize: 20}}>
+          <Text style={{color: colors.text, fontFamily: GlobalStyles.fontSet.fontsemibold, fontSize: 20}}>
             Account Details
           </Text>
         </View>
       </View>
       <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginTop: '10%' }}>
-        <Text style={[settingsstyles.settingspressablestext, { marginBottom: '5%'}]}>Username</Text>
+        <Text style={[settingsstyles.settingspressablestext, { color: colors.text, marginBottom: '5%'}]}>Username</Text>
           <FormInput labelValue={currentName} onChangeText={setCurrentName} autoCapitalize="none" autoCorrect={false} />
-          <TouchableOpacity style={settingsstyles.changes} onPress={async() => {
+          <TouchableOpacity style={[settingsstyles.changes, { backgroundColor: colors.primary }]} onPress={async() => {
             Keyboard.dismiss();
             await updateProfile(auth.currentUser, { displayName: currentName })
               .then(async() => {
@@ -42,7 +46,7 @@ export default function AccountDetails({ navigation }) {
                 Toast.success('Profile updated!')
               })
           }}>
-            <Text style={[settingsstyles.settingspressablestext, { color: 'white' }]}>Confirm Changes</Text>
+            <Text style={[settingsstyles.settingspressablestext, { color: colors.onAccent }]}>Confirm Changes</Text>
           </TouchableOpacity>
       </View>
     </View>
@@ -64,14 +68,12 @@ const settingsstyles = StyleSheet.create({
   },
   
   settingspressablestext: {
-    color: 'white', 
     fontFamily: GlobalStyles.fontSet.fontsemibold, 
     fontSize: 18, 
     textAlign: 'center',
   },
 
   changes: {
-    backgroundColor: '#FF8C00',
     padding: 8,
     borderRadius: 12
   },
@@ -80,7 +82,6 @@ const settingsstyles = StyleSheet.create({
     position: 'absolute',
     top: 20,
     left: 20,
-    backgroundColor: GlobalStyles.colorSet.blue6,
     padding: 10,
     borderRadius: 16
   },

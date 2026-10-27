@@ -3,6 +3,7 @@ import {Text, View, StyleSheet, TouchableOpacity, Switch} from 'react-native';
 import GlobalStyles from '../GlobalStyles';
 import Globals from '../GlobalValues';
 import SettingsStackHeader from '../components/settings/SettingsStackHeader'; 
+import { useTheme } from '../components/global/ThemeContext';
 
 import PrivateIcon from '../assets/icons/privateicon.svg'; 
 import Sepline from '../assets/icons/sepline.svg';
@@ -13,11 +14,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Privacy({navigation}) {
     const [isEnabled, setIsEnabled] = useState(false);
+    const { colors } = useTheme();
+    const textStyle = [settingsstyles.settingspressablestext, { color: colors.text }];
   
   useEffect(() => {
-    console.log('Page JUST opened');
     getBoolean()
-      .then((returnval) => {console.log('returned boolean is:', returnval); setIsEnabled(returnval)})
+      .then((returnval) => setIsEnabled(returnval === true))
   }, [])
 
     const storeBoolean = async (value) => {
@@ -39,35 +41,35 @@ export default function Privacy({navigation}) {
     }
     
   return (
-    <View>
-        <SettingsStackHeader navigation={navigation} currentPage={'Privacy'} navtoPage={'Settings'} hideRightButton={false} />
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <SettingsStackHeader navigation={navigation} currentPage={'Privacy'} hideRightButton={true} />
         <View style={{left: 0}}>
-            <Text style={[settingsstyles.settingspressablestext, {marginLeft: 24, marginTop: 16,}]}>Account Privacy</Text>
+            <Text style={[textStyle, {marginLeft: 24, marginTop: 16,}]}>Account Privacy</Text>
             <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                 <View style={settingsstyles.settingspressables}>
-                    <PrivateIcon />
-                    <Text style={settingsstyles.settingspressablestext}>Private Account</Text>
+                    <PrivateIcon color={colors.text} />
+                    <Text style={textStyle}>Private Account</Text>
                 </View>
                 <Switch
-                    trackColor={{ false: 'rgba(29, 32, 45, 1)', true: 'rgba(243, 115, 112, 1)' }}
-                    thumbColor={'white'}
-                    ios_backgroundColor="rgba(14, 17, 28, 1)"
+                    trackColor={{ false: colors.switchTrackOff, true: colors.dangerSoft }}
+                    thumbColor={colors.onAccent}
+                    ios_backgroundColor={colors.switchTrackOff}
                     onValueChange={value => [storeBoolean(value), setIsEnabled(value)]}
                     value={isEnabled}
                     style={{marginRight: 32, transform: [{scaleX: 1.1}, {scaleY: 1.1}]}}
                 />
             </View>
             <View>
-                <Sepline width={Globals.globalDimensions.width} height={1} preserveAspectRatio="none" />
+                <Sepline width={Globals.globalDimensions.width} height={1} preserveAspectRatio="none" color={colors.text} />
             </View>
-            <Text style={[settingsstyles.settingspressablestext, {marginLeft: 24, marginTop: 24,}]}>Connections</Text>
+            <Text style={[textStyle, {marginLeft: 24, marginTop: 24,}]}>Connections</Text>
             <TouchableOpacity style={settingsstyles.settingspressables} onPress={() => navigation.navigate("Muted Accounts")}>
-                <MutedIcon />
-                <Text style={settingsstyles.settingspressablestext}>Muted Accounts</Text>
+                <MutedIcon color={colors.text} />
+                <Text style={textStyle}>Muted Accounts</Text>
             </TouchableOpacity>
             <TouchableOpacity style={settingsstyles.settingspressables} onPress={() => navigation.navigate("Blocked Accounts")}>
-                <BlockedIcon />
-                <Text style={settingsstyles.settingspressablestext}>Blocked Accounts</Text>
+                <BlockedIcon color={colors.text} />
+                <Text style={textStyle}>Blocked Accounts</Text>
             </TouchableOpacity>
         </View>
     </View>
@@ -83,7 +85,6 @@ const settingsstyles = StyleSheet.create({
   },
   
   settingspressablestext: {
-    color: 'white', 
     fontFamily: GlobalStyles.fontSet.fontsemibold, 
     fontSize: 16, 
     marginLeft: 8,
