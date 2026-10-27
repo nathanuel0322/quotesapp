@@ -19,12 +19,12 @@ npm run web        # expo start --web
 - `src/components/global/` — providers and navigation: `index.js` (provider tree), `AuthProvider.jsx`, `Routes.js`, `AuthStack.js`, `bottomNavigation.jsx`, `ThemeContext.jsx` (light/dark), shared form components.
 - `src/screens/` — one file per screen (Home, Profile, OtherProfile, Create, Settings and its sub-screens, Login/SignUp).
 - `src/components/{home,profile,settings,create}/` — components and stack navigators grouped by feature.
-- `src/GlobalValues.js`, `GlobalFunctions.js`, `GlobalStyles.js` — shared mutable globals, helpers, and styles.
+- `src/GlobalValues.js`, `GlobalStyles.js` — shared mutable globals, and styles (fonts, light/dark palettes, tab bar styles; `showTabBar(colors)` is a function of the active palette).
 - `.env` (gitignored) is read through `react-native-dotenv` (see `babel.config.js`).
 
 ## Conventions
 
-- Users are identified by **username** throughout the app, not uid (only the logged-in user can access their uid).
+- Users are identified by **username** throughout the app, not uid (only the logged-in user can access their uid). The username is the `users/{username}` doc ID, the `profilepictures/{username}` Storage path, and the `username` field on each `quotes` doc, so it must be unique (`register` checks) and renames must go through `changeUsername` in `AuthProvider.jsx`, which moves all three. Read `auth.currentUser.displayName` at call time rather than capturing it, since it can change mid-session.
 - Home is a Stack navigator (profiles are reachable from it); the logged-in user's profile and other users' profiles are separate components (`Profile.jsx` vs `OtherProfile.jsx`).
 - Liking uses a hybrid of local state and Firestore for responsiveness.
 - Theme colors come from `useTheme().colors` (palettes in `GlobalStyles.themes`); avoid hardcoding colors in new components. The preference (`system`/`light`/`dark`) persists in AsyncStorage under `THEME_PREFERENCE`.
