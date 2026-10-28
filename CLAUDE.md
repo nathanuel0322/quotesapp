@@ -34,3 +34,7 @@ npm run web        # expo start --web
 
 - `package.json` `overrides` pin transitive packages (`tar`, `braces`, Babel peers) to patched versions for Dependabot security alerts. After changing them, run `npm install --package-lock-only` and confirm the resolved versions in `package-lock.json`.
 - Stay on Expo SDK 49-compatible versions; use `npx expo install <pkg>` for Expo/React Native native modules.
+
+## Spelling and grammar
+
+`copycheck` (`~/SideWork/copycheck`) checks user-facing text with cspell and a local LanguageTool server. The local pre-commit hook runs `copycheck --staged --warn`, so it only warns; it lives in `.git/hooks`, not the repo, so a fresh clone needs `copycheck hook`. Run `copycheck` before committing copy changes and fix real mistakes. Proper nouns and project words go in `cspell.json`.
